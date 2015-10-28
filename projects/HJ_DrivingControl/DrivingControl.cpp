@@ -17,7 +17,6 @@
 
 using namespace std;
 
-const string DIRPATH = "C:\\Users\\user\\Documents\\なかむら\\つくばチャレンジ2015\\測定データ\\20151023130844";
 const int ENCODER_COM = 10;
 const int CONTROLLER_COM = 9;
 
@@ -103,10 +102,14 @@ private:
 	SharedMemory<int> shMem;
 	enum { EMERGENCY };
 
+	bool retLastSend;
+	bool retLastRead;
+
 
 	/// エンコーダからカウント数を取得して積算する
 	void getEncoderCount();
 	///  Arduinoへ駆動指令を送信
+	void sendDrivingCommand(int mode_int, int forward_int, int  crosswise_int, int delay_int);
 	void sendDrivingCommand(Direction direction , int delay_int = 99999);
 	void sendDrivingCommand_count(Direction direction, int count);
 	/// 指令した駆動の完了を待機
@@ -117,7 +120,7 @@ private:
 	Direction nowDirection;
 
 	void checkEmergencyStop(Timer& timer);
-	void returnEmergency(int isEmergency);
+	int askIsDriving();
 
 public:
 	// もろもろの初期化処理
@@ -161,7 +164,7 @@ DrivingControl::DrivingControl(string fname, double coefficientL, double coeffic
 	y_now = y_next;
 
 	getArduinoHandle(encoderCOM, hEncoderComm);
-	getArduinoHandle(controllerCOM, hControllerComm);
+	getArduinoHandle(controllerCOM, hControllerComm,100);
 
 	shMem.reset();
 	shMem.setShMemData(false, EMERGENCY);
@@ -265,54 +268,50 @@ void DrivingControl::sendDrivingCommand_count( Direction direction , int count)
 
 void DrivingControl::sendDrivingCommand(Direction direction, int delay_int)
 {
+	int mode = '1';
+
+	if (direction != STOP) nowDirection = direction;
+
+	switch (direction)
+	{
+	case STOP:
+		mode = '0';
+		sendDrivingCommand(mode, 0, 0, delay_int);
+		break;
+
+	case FORWARD:
+		sendDrivingCommand(mode, -1000, 405, delay_int);
+		break;
+
+	case BACKWARD:
+		sendDrivingCommand(mode, 600, 509, delay_int);
+		break;
+
+	case RIGHT:
+		sendDrivingCommand(mode, -380, -1500, delay_int);
+		break;
+
+	case LEFT:
+		sendDrivingCommand(mode, 0, 1500, delay_int);
+		break;
+
+	default:
+		break;
+	}
+}
+
+void DrivingControl::sendDrivingCommand(int mode_int,int forward_int, int  crosswise_int , int delay_int)
+{
 	unsigned char	sendbuf[18];
 	unsigned char	receive_data[18];
 	unsigned long	len;
 
 	unsigned char	mode;
 	unsigned char	sign1, sign2;
-	int				forward_int, crosswise_int;
 	ostringstream	forward_sout, crosswise_sout, delay_sout;
 	string			forward_str, crosswise_str, delay_str;
 
-	mode = '1';
-
-	switch (direction)
-	{
-	case STOP:
-		mode = '0';
-		forward_int = 0;
-		crosswise_int = 0;
-		nowDirection = STOP;
-		break;
-
-	case FORWARD:
-		forward_int = -1000;
-		crosswise_int = 405;
-		nowDirection = FORWARD;
-		break;
-
-	case BACKWARD:
-		forward_int = 600;
-		crosswise_int = 509;
-		nowDirection = BACKWARD;
-		break;
-
-	case RIGHT:
-		forward_int = -380;
-		crosswise_int = -1500;
-		nowDirection = RIGHT;
-		break;
-
-	case LEFT:
-		forward_int = 0;
-		crosswise_int = 1500;
-		nowDirection = LEFT;
-		break;
-
-	default:
-		break;
-	}
+	mode = (unsigned char)to_string(mode_int).c_str();
 
 	if (forward_int < 0)
 	{
@@ -354,7 +353,7 @@ void DrivingControl::sendDrivingCommand(Direction direction, int delay_int)
 	// 通信バッファクリア
 	PurgeComm(hControllerComm, PURGE_RXCLEAR);
 	// 送信
-	WriteFile(hControllerComm, &sendbuf, sizeof(sendbuf), &len, NULL);
+	retLastSend = WriteFile(hControllerComm, &sendbuf, sizeof(sendbuf), &len, NULL);
 
 	cout << "send:";
 	for (int i = 0; i < len; i++)
@@ -369,7 +368,7 @@ void DrivingControl::sendDrivingCommand(Direction direction, int delay_int)
 	PurgeComm(hControllerComm, PURGE_RXCLEAR);
 	len = 0;
 	// Arduinoからデータを受信
-	//ReadFile(hControllerComm, &receive_data, sizeof(receive_data), &len, NULL);
+	retLastRead = ReadFile(hControllerComm, &receive_data, sizeof(receive_data), &len, NULL);
 
 	cout << "receive:";
 	for (int i = 0; i < len; i++)
@@ -443,6 +442,11 @@ void DrivingControl::waitDriveComplete()
 	rightCount = 0;
 	sendDrivingCommand(STOP);
 }
+int DrivingControl::askIsDriving()
+{
+	sendDrivingCommand(1, 0, 0, 0);
+	return 0;
+}
 
 void DrivingControl::checkEmergencyStop(Timer& timer)
 {
@@ -469,21 +473,32 @@ void DrivingControl::checkEmergencyStop(Timer& timer)
 		right = true;
 	}
 
-	if ((left && right) )
+	if (left && right )
 	{
-		//sendDrivingCommand(STOP);
-		if (MessageBoxA(NULL, "もしかして非常停止？", "もしかして！", MB_YESNO | MB_ICONSTOP) == IDYES)
+		cout << "非常停止してるかも" << endl;
+		sendDrivingCommand(1, 0, 0, 0);
+
+		if (!retLastRead){
+			if (MessageBoxA(NULL, "もしかして非常停止してる？？\n動いてもいい？？", "もしかして！", MB_YESNO | MB_ICONSTOP) == IDYES)
+			{
+				sendDrivingCommand(nowDirection, waittime - time);
+				Sleep(1000);
+				timer.getLapTime();
+				shMem.setShMemData(false, EMERGENCY);
+			}
+		}
+	}
+	if (shMem.getShMemData(EMERGENCY))
+	{
+		sendDrivingCommand(STOP);
+		if (MessageBoxA(NULL, "動いてもいい？？", "もしかしてなんか危ない？？", MB_YESNO | MB_ICONSTOP) == IDYES)
 		{
 			sendDrivingCommand(nowDirection, waittime - time);
 			Sleep(1000);
 			timer.getLapTime();
-			//shMem.setShMemData(false, EMERGENCY);
+			shMem.setShMemData(false, EMERGENCY);
 		}
 	}
-}
-void DrivingControl::returnEmergency(int isEmergency)
-{
-	if (!isEmergency) return;
 }
 
 void DrivingControl::waitDriveComplete_FF()
