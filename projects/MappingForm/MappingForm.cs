@@ -192,7 +192,7 @@ namespace csPCIform
                     //画像の幅，高さ，解像度
                     + imgWidthTxtbox.Text.ToString() + " " + imgHeightTxtbox.Text.ToString() + " " + imgResolutionTxtbox.Text.ToString();
 
-                myProcess.StartInfo.FileName = "../../../Debug\\cvPCDtest.exe";
+                myProcess.StartInfo.FileName = "../../../Debug\\Mapping.exe";
                 myProcess.StartInfo.Arguments = args;
                 myProcess.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
                 myProcess.Start();

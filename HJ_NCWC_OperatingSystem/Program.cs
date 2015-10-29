@@ -30,7 +30,7 @@ namespace HJ_NCWC_OperatingSystem
             this.picSayaka.Dock = DockStyle.Fill;
             //this.picSayaka.SizeMode = PictureBoxSizeMode.AutoSize;
             System.IO.FileStream fs;
-            fs = new System.IO.FileStream("C:\\Users\\user\\Documents\\Visual Studio 2013\\Projects\\HJ_NCWC_OperatingSystem\\res\\img\\144356b2-s.jpg"
+            fs = new System.IO.FileStream("../../../res\\img\\144356b2-s.jpg"
                                  , System.IO.FileMode.Open
                                  , System.IO.FileAccess.Read);
             picSayaka.Image = System.Drawing.Image.FromStream(fs);

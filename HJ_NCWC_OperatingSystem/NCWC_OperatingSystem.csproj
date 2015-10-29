@@ -80,13 +80,13 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\cvPCDtest\csPCIform\MappingForm.csproj">
-      <Project>{65732a06-615e-4065-bb4f-0e752f99d8d4}</Project>
-      <Name>MappingForm</Name>
-    </ProjectReference>
     <ProjectReference Include="..\projects\HJ_MakeRoute\MakeRouteForm.csproj">
       <Project>{60d1ade1-62c6-4d65-b0ec-27eefaf16734}</Project>
       <Name>MakeRouteForm</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\projects\MappingForm\MappingForm.csproj">
+      <Project>{65732a06-615e-4065-bb4f-0e752f99d8d4}</Project>
+      <Name>MappingForm</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

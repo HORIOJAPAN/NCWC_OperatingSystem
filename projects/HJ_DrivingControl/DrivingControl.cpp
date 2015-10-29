@@ -53,6 +53,8 @@ void getArduinoHandle(int arduinoCOM, HANDLE& hComm , int timeoutmillisec = 0)
 		COMMTIMEOUTS lpTimeout;
 		GetCommTimeouts(hComm, &lpTimeout);
 		lpTimeout.ReadIntervalTimeout = timeoutmillisec;
+		lpTimeout.ReadTotalTimeoutMultiplier = 0;
+		lpTimeout.ReadTotalTimeoutConstant = timeoutmillisec;
 		SetCommTimeouts(hComm, &lpTimeout);
 
 	}
@@ -97,7 +99,7 @@ private:
 	int		controllerCOM;
 	HANDLE	hControllerComm;
 	enum Direction	{ STOP, FORWARD, BACKWARD , RIGHT , LEFT };
-	float		aimCount_L, aimCount_R;
+	int		aimCount_L, aimCount_R;
 
 	SharedMemory<int> shMem;
 	enum { EMERGENCY };
@@ -164,7 +166,7 @@ DrivingControl::DrivingControl(string fname, double coefficientL, double coeffic
 	y_now = y_next;
 
 	getArduinoHandle(encoderCOM, hEncoderComm);
-	getArduinoHandle(controllerCOM, hControllerComm,100);
+	getArduinoHandle(controllerCOM, hControllerComm,500);
 
 	shMem.reset();
 	shMem.setShMemData(false, EMERGENCY);
@@ -268,14 +270,14 @@ void DrivingControl::sendDrivingCommand_count( Direction direction , int count)
 
 void DrivingControl::sendDrivingCommand(Direction direction, int delay_int)
 {
-	int mode = '1';
+	int mode = 1;
 
 	if (direction != STOP) nowDirection = direction;
 
 	switch (direction)
 	{
 	case STOP:
-		mode = '0';
+		mode = 0;
 		sendDrivingCommand(mode, 0, 0, delay_int);
 		break;
 
@@ -311,7 +313,7 @@ void DrivingControl::sendDrivingCommand(int mode_int,int forward_int, int  cross
 	ostringstream	forward_sout, crosswise_sout, delay_sout;
 	string			forward_str, crosswise_str, delay_str;
 
-	mode = (unsigned char)to_string(mode_int).c_str();
+	mode = to_string(mode_int)[0];
 
 	if (forward_int < 0)
 	{
@@ -335,8 +337,7 @@ void DrivingControl::sendDrivingCommand(int mode_int,int forward_int, int  cross
 
 	delay_sout << setfill('0') << setw(5) << delay_int;
 	delay_str = delay_sout.str();
-
-	waittime = delay_int;
+	if (delay_int)	waittime = delay_int;
 
 	// バッファクリア
 	memset(sendbuf, 0x00, sizeof(sendbuf));
@@ -376,6 +377,8 @@ void DrivingControl::sendDrivingCommand(int mode_int,int forward_int, int  cross
 		cout << receive_data[i];
 	}
 	cout << endl;
+
+	cout << retLastRead << endl;
 }
 
 
@@ -454,13 +457,13 @@ void DrivingControl::checkEmergencyStop(Timer& timer)
 	bool right = false;
 
 	int time = timer.getLapTime(1, Timer::millisec, false);
-	/*
-	cout << timer.getLapTime(1, Timer::millisec, false) << "millisec" << endl;
-	cout << timer.getLapTime(1, Timer::millisec, false) * abs(aimCount_L) << "," << abs(leftCount + 1) * waittime << endl;
+	
+	cout << time << "millisec" << endl;
+	cout << time * abs(aimCount_L) << "," << abs(leftCount) * waittime << endl;
 	cout << leftCount << "," << rightCount << endl;
 	cout << aimCount_L << "," << aimCount_R << endl;
 	cout << waittime << endl;
-	*/
+	
 
 	if (((float)time + 1000) / (float)waittime * 100 > 98 ) return;
 
@@ -477,8 +480,7 @@ void DrivingControl::checkEmergencyStop(Timer& timer)
 	{
 		cout << "非常停止してるかも" << endl;
 		sendDrivingCommand(1, 0, 0, 0);
-
-		if (!retLastRead){
+		if (retLastRead){
 			if (MessageBoxA(NULL, "もしかして非常停止してる？？\n動いてもいい？？", "もしかして！", MB_YESNO | MB_ICONSTOP) == IDYES)
 			{
 				sendDrivingCommand(nowDirection, waittime - time);
@@ -567,7 +569,7 @@ void DrivingControl::run()
 
 void main()
 {
-	DrivingControl DC("test07.rt", 24.0086517664 / 1.005, 23.751783167, ENCODER_COM, CONTROLLER_COM);
+	DrivingControl DC("../../data/route/test07.rt", 24.0086517664 / 1.005, 23.751783167, ENCODER_COM, CONTROLLER_COM);
 	DC.run_FF();
 
 	cout << "complete" << endl;

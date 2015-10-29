@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NCWC_OperatingSystem", "HJ_NCWC_OperatingSystem\NCWC_OperatingSystem.csproj", "{5FD6769A-D67A-4470-8FD7-815F248CB8F2}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MappingForm", "..\cvPCDtest\csPCIform\MappingForm.csproj", "{65732A06-615E-4065-BB4F-0E752F99D8D4}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PCDFunctions", "projects\cvPCDFunctions\cvPCDFunctions.vcxproj", "{6B2156D8-B12D-4E38-8FFB-F7E56145BF75}"
 EndProject
@@ -24,6 +22,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SharedMemorypp", "projects\SharedMemoryTESTpp\SharedMemoryTESTpp.vcxproj", "{70A7D7F2-53D7-4452-8591-8E40A99AF1F8}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Timer", "projects\Timer\Timer.vcxproj", "{C64C572B-D760-463B-A17E-A706F44B6CAC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MappingForm", "projects\MappingForm\MappingForm.csproj", "{65732A06-615E-4065-BB4F-0E752F99D8D4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,18 +47,6 @@ Global
 		{5FD6769A-D67A-4470-8FD7-815F248CB8F2}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{5FD6769A-D67A-4470-8FD7-815F248CB8F2}.Release|Win32.ActiveCfg = Debug|Any CPU
 		{5FD6769A-D67A-4470-8FD7-815F248CB8F2}.Release|Win32.Build.0 = Debug|Any CPU
-		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Debug|Win32.Build.0 = Debug|Any CPU
-		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Release|Win32.ActiveCfg = Debug|Any CPU
-		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Release|Win32.Build.0 = Debug|Any CPU
 		{6B2156D8-B12D-4E38-8FFB-F7E56145BF75}.Debug|Any CPU.ActiveCfg = Debug|Win32
 		{6B2156D8-B12D-4E38-8FFB-F7E56145BF75}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
 		{6B2156D8-B12D-4E38-8FFB-F7E56145BF75}.Debug|Mixed Platforms.Build.0 = Debug|Win32
@@ -151,6 +139,16 @@ Global
 		{C64C572B-D760-463B-A17E-A706F44B6CAC}.Release|Mixed Platforms.Build.0 = Release|Win32
 		{C64C572B-D760-463B-A17E-A706F44B6CAC}.Release|Win32.ActiveCfg = Debug|Win32
 		{C64C572B-D760-463B-A17E-A706F44B6CAC}.Release|Win32.Build.0 = Debug|Win32
+		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Release|Win32.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
