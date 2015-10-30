@@ -4,6 +4,7 @@
 #include <fstream>
 
 #include "SharedMemory.h"
+#include "../cvPCDtest/pcimage.h"
 
 using namespace cv;
 using namespace std;
@@ -19,6 +20,7 @@ Size zoomSize(800,600);
 Size reductionRate;
 Point zoomPoint;
 Point prePoint(-1,-1);
+Point originXY;
 
 // 共有メモリ系
 SharedMemory<int> shMem("CoordinateOfMap");
@@ -177,6 +179,24 @@ void main(int argc, char* argv[])
 {
 	// コマンドライン引数からパスを取得して画像を読み込む
 	pic = imread(argv[1] , 0);
+
+	ifstream ifs("origin.txt");
+	if (ifs.fail())
+	{
+		originXY = Point(0, 0);
+		cout << "Origin:" << originXY.x << "," << originXY.y << endl;
+	}
+	else
+	{
+		string str;
+		getline(ifs, str);
+		originXY.x = stoi(str);
+		getline(ifs, str);
+		originXY.y = stoi(str);
+		cout << "Origin:" << originXY.x << "," << originXY.y << endl;
+	}
+
+	//uniteImage(argv[1], originXY, pic, 1000);
 
 	// 複製
 	pic_col = Mat(pic.rows, pic.cols, CV_8UC3);

@@ -102,7 +102,7 @@ private:
 	int		aimCount_L, aimCount_R;
 
 	SharedMemory<int> shMem;
-	enum { EMERGENCY };
+	enum { EMERGENCY , SIZEOFENUM };
 
 	bool retLastSend;
 	bool retLastRead;

@@ -16,10 +16,10 @@ const string DIRPATH = "C:\\Users\\user\\Documents\\なかむら\\つくばチャレンジ20
 //const string DIRPATH = "C:\\Users\\NCWC\\Source\\Repos\\pointcloudimage2\\csPCIform\\bin\\Debug\\20151023115020";
 
 
-void getAllFileName(vector<string>& fileNames, string extension)
+void getAllFileName(vector<string>& fileNames, string extension , string path )
 {
 	namespace sys = std::tr2::sys;
-	sys::path p(DIRPATH); // 列挙の起点
+	sys::path p(path); // 列挙の起点
 	ifstream ifs;
 	string fname;
 
@@ -141,7 +141,7 @@ void makePcimage( int start = 0 , int end = 0 )
 
 	vector<string> allFileNames;
 	vector<string> sortFileNames;
-	getAllFileName(allFileNames,"pcd");
+	getAllFileName(allFileNames,"pcd" , DIRPATH);
 
 	sortfnames(allFileNames, sortFileNames);
 
@@ -241,7 +241,7 @@ void uniteImage()
 	int maxX = 0, minX = 0;
 	int maxY = 0, minY = 0;
 
-	getAllFileName(allFileNames, "jpg");
+	getAllFileName(allFileNames, "jpg",DIRPATH);
 	minmaxXY(allFileNames, maxX, minX, maxY, minY);
 
 	int size_X = maxX - minX + 1;
@@ -277,8 +277,58 @@ void uniteImage()
 	imwrite(DIRPATH + "\\" + "margeImage.jpg", margeImg);
 
 	Mat trimImg;
-	trimming(pcimageArray, trimImg, Size(size_X, size_Y), originImg, Size(2000,1000), Point(500, 0));
+	//trimming(pcimageArray, trimImg, Size(size_X, size_Y), originImg, Size(2000,1000), Point(500, 0));
 	waitKey();
+
+	for (int i = 0; i < size_X; i++) {
+		delete[] pcimageArray[i];
+	}
+	delete[] pcimageArray;
+
+	ofstream ofs("origin.txt");
+	ofs << originImg.x << endl;
+	ofs << originImg.y << endl;
+}
+
+
+void uniteImage(string dirPath , Point& originXY , Mat& mappImg ,int width)
+{
+	int height = width;
+
+	vector<string> allFileNames;
+	int maxX = 0, minX = 0;
+	int maxY = 0, minY = 0;
+
+	getAllFileName(allFileNames, "jpg", dirPath);
+	minmaxXY(allFileNames, maxX, minX, maxY, minY);
+
+	int size_X = maxX - minX + 1;
+	int size_Y = maxY - minY + 1;
+
+	Mat** pcimageArray = new Mat*[size_X];
+	for (int i = 0; i < size_X; i++)
+	{
+		pcimageArray[i] = new Mat[size_Y];
+	}
+
+	mappImg = Mat(size_Y * height, size_X * width, CV_8U).clone();
+	Rect roiRect(0, 0, width, height);
+	for (int x = 0; x < size_X; x++)
+	{
+		for (int y = 0; y < size_Y; y++)
+		{
+			pcimageArray[x][y] = imread(dirPath + "\\" + to_string(minX + x) + "_" + to_string(minY + y) + ".jpg");
+			if (pcimageArray[x][y].empty()) pcimageArray[x][y] = Mat(height, width, CV_8UC3, Scalar::all(0));
+
+			if (minX + x == 0 && minY + y == 0) originXY = Point(x * width, y * height);
+
+			Mat roi(mappImg, roiRect);
+			pcimageArray[x][y].copyTo(roi);
+			roiRect.y += height;
+		}
+		roiRect.y = 0;
+		roiRect.x += width;
+	}
 
 	for (int i = 0; i < size_X; i++) {
 		delete[] pcimageArray[i];

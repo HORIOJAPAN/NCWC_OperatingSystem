@@ -8,6 +8,9 @@
 
 const int imageNum = 4;		//事前に用意する画像領域の数
 
+// ディレクトリ名を指定してマッピング用画像を生成
+void uniteImage(std::string dirPath, cv::Point& originXY, cv::Mat& mappImg, int width = 1000);
+
 //点群画像を作成するクラス
 class PCImage
 {
