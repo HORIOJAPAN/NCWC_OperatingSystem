@@ -80,12 +80,15 @@ private:
 public:
 	//コンストラクタ
 	PCImage();
-	PCImage( int resolution );
-	PCImage( int width, int height, int resolution);
 	//デストラクタ
 	~PCImage();
 
 	PCImage& operator=(PCImage& pci);
+
+	// 初期化処理
+	void initPCImage();
+	void initPCImage(int resolution);
+	void initPCImage(int width, int height, int resolution);
 
 	// 画像に点を書き込む
 	void writePoint(float x_val, float y_val);

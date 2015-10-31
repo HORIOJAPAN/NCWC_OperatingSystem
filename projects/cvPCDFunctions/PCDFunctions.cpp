@@ -136,7 +136,8 @@ void sortfnames(vector<string>& allFileNames, vector<string>& sortFileNames)
 
 void makePcimage( int start = 0 , int end = 0 )
 {
-	PCImage pcimage(1000, 1000, 5);
+	PCImage pcimage = PCImage();
+	pcimage.initPCImage();
 	pcimage.isWriteLine = false;
 
 	vector<string> allFileNames;

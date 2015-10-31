@@ -21,7 +21,25 @@ bool PCImage::isColor = true;
 *	int height　横
 *	int resolution　1pix何cm四方にするか
 */
-PCImage::PCImage(int width, int height, int resolution) : pcimage(imageNum, *this)
+PCImage::PCImage() : pcimage(imageNum, *this){}
+
+//デストラクタ
+//解放されていない画像領域があれば保存しておく
+PCImage::~PCImage()
+{
+	for (int i = 0; i < imageNum; i++)
+		if (!pcimage[i].empty())
+		{
+			pcimage[i].release();
+		}
+}
+
+PCImage& PCImage::operator = (PCImage& pci)
+{
+	return *this;
+}
+
+void PCImage::initPCImage(int width, int height, int resolution)
 {
 	//-----メンバの初期化-----
 	img_width = width;
@@ -53,36 +71,16 @@ PCImage::PCImage(int width, int height, int resolution) : pcimage(imageNum, *thi
 		<< "\nHeight:" << pcimage[nowimage].rows << endl;
 
 	Sleep(2000);
-
 }
-
-//コンストラクタのオーバーロード
-PCImage::PCImage()
+void PCImage::initPCImage()
 {
-	this->PCImage::PCImage( 1000, 1000, 5);
-
+	this->PCImage::initPCImage(1000, 1000, 5);
 }
-PCImage::PCImage(int resolution )
+void PCImage::initPCImage(int resolution)
 {
-	this->PCImage::PCImage( 1000, 1000, resolution);
-
+	this->PCImage::initPCImage(1000, 1000, resolution);
 }
 
-//デストラクタ
-//解放されていない画像領域があれば保存しておく
-PCImage::~PCImage()
-{
-	for (int i = 0; i < imageNum; i++)
-		if (!pcimage[i].empty())
-		{
-			pcimage[i].release();
-		}
-}
-
-PCImage& PCImage::operator = (PCImage& pci)
-{
-	return *this;
-}
 
 void PCImage::prepareArrow()
 {
