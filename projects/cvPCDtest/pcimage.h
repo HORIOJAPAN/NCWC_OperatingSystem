@@ -90,6 +90,8 @@ public:
 	void initPCImage(int resolution);
 	void initPCImage(int width, int height, int resolution);
 
+	PCImage instantiate();
+
 	// ‰æ‘œ‚É“_‚ğ‘‚«‚Ş
 	void writePoint(float x_val, float y_val);
 	// “_‚ğ‘‚«‚ñ‚¾Œã‚Éü‚ğ•`‰æ‚·‚é

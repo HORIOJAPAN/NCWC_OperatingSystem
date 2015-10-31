@@ -179,7 +179,7 @@ void getArduinoHandle(int arduinoCOM , HANDLE& hComm)
 *	返り値:
 *		なし
 */
-void getDataUNKOOrigin(int URG_COM[], float URGPOS[][3], int ARDUINO_COM, int NumOfURG)
+void getDataUNKOOrigin(int URG_COM[], float URGPOS[][4], int ARDUINO_COM, int NumOfURG)
 {
 	/**********************
 	 *　↓　変数の宣言　↓
@@ -218,7 +218,7 @@ void getDataUNKOOrigin(int URG_COM[], float URGPOS[][3], int ARDUINO_COM, int Nu
 	*****************************/
 
 	// 姿勢表示用矢印の読み込み
-	arrowpic = imread("arrow.jpg");
+	arrowpic = imread("../../res/img/arrow.jpg");
 	if (arrowpic.empty()) cout << "No arrow image" << endl;
 	arrowpic = ~arrowpic;
 
@@ -234,7 +234,7 @@ void getDataUNKOOrigin(int URG_COM[], float URGPOS[][3], int ARDUINO_COM, int Nu
 
 	PCImage pcimage = PCImage();
 	pcimage.initPCImage();
-	urg_unko::initPCImage(pcimage);
+	urg_unko::initPCImage(&pcimage);
 
 	//接続したURGの数だけurg_unko型オブジェクトを初期化
 	for (int i = 0; i < NumOfURG; i++)

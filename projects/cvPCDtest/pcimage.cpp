@@ -50,7 +50,7 @@ void PCImage::initPCImage(int width, int height, int resolution)
 	limitpix = limit * coefficient;
 
 	for (int i = 0; i < sizeof(color); i++) color[i] = false;
-	prepareArrow();
+	//prepareArrow();
 
 	//年月日時分秒で命名したディレクトリを作成
 	getNowTime(dirname);
@@ -79,6 +79,11 @@ void PCImage::initPCImage()
 void PCImage::initPCImage(int resolution)
 {
 	this->PCImage::initPCImage(1000, 1000, resolution);
+}
+
+PCImage PCImage::instantiate()
+{
+	return *this;
 }
 
 
