@@ -502,27 +502,26 @@ urg_driving::ObstacleEmergency urg_driving::checkObstacle()
 		y = (float)(l * sin(radian));
 		z = urgpos[0];
 
-		ideal_x = +cos(this->radian + urgpos[3]) * x + sin(this->radian + urgpos[3]) * y;
-		ideal_y = -sin(this->radian + urgpos[3]) * x + cos(this->radian + urgpos[3]) * y;
+		ideal_x = l * cos(radian - urgpos[3]);
+		ideal_y = l * sin(radian - urgpos[3]);
 
-		if (ideal_x < 1000 && abs(ideal_y) < 200)
-			// 左センサの領域判別
-			if (urgpos[2] < 0)
+		// 左センサの領域判別
+		if (urgpos[2] < 0)
+		{
+			if (ideal_x < 1000.0 && ideal_y < 50.0 && ideal_y > -20.0)
+				//if (ideal_x < 1000.0)
 			{
-				//if (ideal_x < 1000.0 && ideal_y < 150.0 && ideal_y > -150.0)
-				if (ideal_x < 1000.0)
-				{
-					count += 1;
-				}
+				count += 1;
 			}
-		// 右センサの領域判別
-		/*else if (urgpos[2] > 0)
-		{
-		if (ideal_x < 1000.0 && ideal_y < 150.0 && ideal_y > -150.0)
-		{
-		count += 1;
 		}
-		}*/
+		// 右センサの領域判別
+		else if (urgpos[2] > 0)
+		{
+			if (ideal_x < 1000.0 && ideal_y < 20.0 && ideal_y > -50.0)
+			{
+				count += 1;
+			}
+		}
 		if (count > 8){
 			return DETECT;
 			//printf("点の数　= %d\n", count);
