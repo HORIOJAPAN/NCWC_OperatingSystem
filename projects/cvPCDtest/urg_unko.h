@@ -111,6 +111,7 @@ public:
 	void updateCurrentCoord(float coordXY[]);
 
 	static void initPCImage( PCImage& pci );
+	static void initPCImage(int width, int height, int resolution);
 	void setPCImageColor(PCImage::BGR bgr);
 
 };

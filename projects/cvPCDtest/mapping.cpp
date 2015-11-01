@@ -231,10 +231,8 @@ void getDataUNKOOrigin(int URG_COM[], float URGPOS[][4], int ARDUINO_COM, int Nu
 
 	PCImage::isColor = true;
 	PCImage::BGR color[2] = { PCImage::B, PCImage::G };
-
-	PCImage pcimage = PCImage();
-	pcimage.initPCImage();
-	urg_unko::initPCImage(&pcimage);
+	
+	urg_unko::initPCImage(imgWidth,imgHeight,imgResolution);
 
 	//接続したURGの数だけurg_unko型オブジェクトを初期化
 	for (int i = 0; i < NumOfURG; i++)

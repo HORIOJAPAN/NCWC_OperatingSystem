@@ -357,6 +357,10 @@ void urg_unko::initPCImage(PCImage& pci)
 {
 	pcimage = pci;
 }
+void urg_unko::initPCImage(int width, int height, int resolution)
+{
+	pcimage.initPCImage(width,height, resolution);
+}
 
 void urg_unko::setPCImageColor(PCImage::BGR bgr)
 {
