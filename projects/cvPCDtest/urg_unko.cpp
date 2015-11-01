@@ -215,7 +215,7 @@ void urg_unko::calcSurface2D()
 			ideal_x = +cos(this->radian + urgpos[3]) * x + sin(this->radian + urgpos[3]) * y;
 			ideal_y = -sin(this->radian + urgpos[3]) * x + cos(this->radian + urgpos[3]) * y;
 
-			if (ideal_y < 1000 && abs(ideal_x) < 100)
+			if (ideal_x < 1000 && abs(ideal_y) < 200)
 			{
 				shMem.setShMemData(true, EMARGENCY);
 			}
