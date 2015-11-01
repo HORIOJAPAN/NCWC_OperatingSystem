@@ -197,6 +197,7 @@ void urg_unko::set_3D_surface(int data_n)
 			long l = data[i];	//æ“¾‚µ‚½“_‚Ü‚Å‚Ì‹——£
 			double radian;
 			float x, y, z;
+			float ideal_x, ideal_y;
 			float pointpos[3];
 
 			//ˆÙí’l‚È‚ç‚Æ‚Î‚·
@@ -211,22 +212,28 @@ void urg_unko::set_3D_surface(int data_n)
 			radian = urg_index2rad(&urg, i);
 			x = (float)(l * cos(radian));
 			y = (float)(l * sin(radian));
-			z = 120.0;
+			z = urgpos[0];
 
-			if (x < 1000 && abs(y) < 1000)
+			ideal_x = +cos(this->radian + urgpos[3]) * x + sin(this->radian + urgpos[3]) * y;
+			ideal_y = -sin(this->radian + urgpos[3]) * x + cos(this->radian + urgpos[3]) * y;
+
+			if (ideal_y < 1000 && abs(ideal_x) < 100)
 			{
 				shMem.setShMemData(true, EMARGENCY);
 			}
 
 			//2ŸŒ³•½–Ê‚ÌÀ•W•ÏŠ·
-			//pointpos[0] = +cos(radian + urgpos[3]) * (x + distance - distance_old + urgpos[1]) + sin(radian + urgpos[3]) * (y + urgpos[2]) + currentCoord_x;
-			//pointpos[1] = -sin(radian + urgpos[3]) * (x + distance - distance_old + urgpos[1]) + cos(radian + urgpos[3]) * (y + urgpos[2]) + currentCoord_y;
+			pointpos[0] = ideal_x + cos(this->radian) * (distance - distance_old + urgpos[1]) + sin(this->radian) * urgpos[2] + currentCoord_x;
+			pointpos[1] = ideal_y - sin(this->radian) * (distance - distance_old + urgpos[1]) + cos(this->radian) * urgpos[2] + currentCoord_y;
+
+			//pointpos[0] = ideal_x;
+			//pointpos[1] = ideal_y;
 
 			//pointpos[0] = +cos(this->radian) * x + sin(this->radian) * y + cos(this->radian) * (distance - distance_old + urgpos[1]) + currentCoord_x;
 			//pointpos[1] = -sin(this->radian) * x + cos(this->radian) * y - sin(this->radian) * (distance - distance_old + urgpos[1]) + currentCoord_y;
 
-			pointpos[0] = +cos(this->radian + urgpos[3]) * x + sin(this->radian + urgpos[3]) * y + cos(this->radian) * (distance - distance_old + urgpos[1]) + sin(this->radian) * urgpos[2] + currentCoord_x;
-			pointpos[1] = -sin(this->radian + urgpos[3]) * x + cos(this->radian + urgpos[3]) * y - sin(this->radian) * (distance - distance_old + urgpos[1]) + cos(this->radian) * urgpos[2] + currentCoord_y;
+			//pointpos[0] = +cos(this->radian + urgpos[3]) * x + sin(this->radian + urgpos[3]) * y + cos(this->radian) * (distance - distance_old + urgpos[1]) + sin(this->radian) * urgpos[2] + currentCoord_x;
+			//pointpos[1] = -sin(this->radian + urgpos[3]) * x + cos(this->radian + urgpos[3]) * y - sin(this->radian) * (distance - distance_old + urgpos[1]) + cos(this->radian) * urgpos[2] + currentCoord_y;
 
 			pointpos[2] = z;
 

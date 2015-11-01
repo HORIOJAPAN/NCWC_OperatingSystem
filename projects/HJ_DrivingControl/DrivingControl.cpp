@@ -528,6 +528,8 @@ void DrivingControl::run_FF()
 {
 	getEncoderCount();
 
+	char z = getchar();
+
 	while (getNextPoint())
 	{
 		calcRotationAngle();
@@ -569,7 +571,7 @@ void DrivingControl::run()
 
 void main()
 {
-	DrivingControl DC("../../data/route/test07.rt", 24.0086517664 / 1.005, 23.751783167, ENCODER_COM, CONTROLLER_COM);
+	DrivingControl DC("../../data/route/test09.rt", 24.0086517664 / 1.005, 23.751783167, ENCODER_COM, CONTROLLER_COM);
 	DC.run_FF();
 
 	cout << "complete" << endl;
