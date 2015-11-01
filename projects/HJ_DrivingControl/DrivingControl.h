@@ -97,6 +97,8 @@ private:
 	Direction nowDirection;
 
 	void checkEmergencyStop(Timer& timer);
+	void restart(int time, Timer& timer);
+	bool isObstacle = false;
 
 	urg_driving* urgdArray;
 

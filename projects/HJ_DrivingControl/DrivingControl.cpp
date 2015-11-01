@@ -357,30 +357,33 @@ void DrivingFollowPath::waitDriveComplete()
 	sendDrivingCommand(STOP);
 }
 
+void DrivingFollowPath::restart(int time , Timer& timer )
+{
+	sendDrivingCommand(nowDirection, waittime - time);
+	//Sleep(1000);
+	timer.getLapTime();
+}
+
 void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 {
 	bool left = false;
 	bool right = false;
 
-	int time = timer.getLapTime(1, Timer::millisec, false);
-	
+	int time = timer.getLapTime(1, Timer::millisec, false) - 1000;
+	if (time < 0) time = 0;
+	/*
 	cout << time << "millisec" << endl;
 	cout << time * abs(aimCount_L) << "," << abs(leftCount) * waittime << endl;
 	cout << leftCount << "," << rightCount << endl;
 	cout << aimCount_L << "," << aimCount_R << endl;
 	cout << waittime << endl;
+    */
 	
 
 	if (((float)time + 1000) / (float)waittime * 100 > 98 ) return;
 
-	if (time * abs(aimCount_L) > abs(leftCount) * waittime)
-	{
-		left = true;
-	}
-	if (time * abs(aimCount_R) > abs(rightCount) * waittime)
-	{
-		right = true;
-	}
+	if (time * abs(aimCount_L) > abs(leftCount) * waittime)     left = true;
+	if (time * abs(aimCount_R) > abs(rightCount) * waittime)    right = true;
 
 	if (left && right)
 	{
@@ -388,22 +391,21 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 		DrivingControl::sendDrivingCommand(1, 0, 0, 0);
 		if (retLastRead){
 			if (MessageBoxA(NULL, "もしかして非常停止してる？？\n動いてもいい？？", "もしかして！", MB_YESNO | MB_ICONSTOP) == IDYES)
-			{
-				sendDrivingCommand(nowDirection, waittime - time);
-				Sleep(1000);
-				timer.getLapTime();
-			}
+                restart(time, timer);
 		}
 	}
 	if (urgdArray[0].checkObstacle() || urgdArray[1].checkObstacle())
 	{
 		sendDrivingCommand(STOP);
 		if (MessageBoxA(NULL, "動いてもいい？？", "もしかしてなんか危ない？？", MB_YESNO | MB_ICONSTOP) == IDYES)
-		{
-			sendDrivingCommand(nowDirection, waittime - time);
-			Sleep(1000);
-			timer.getLapTime();
-		}
+            restart(time, timer);
+
+		isObstacle = true;
+	}
+	else if (isObstacle)
+	{
+		isObstacle = false;
+		restart(time, timer);
 	}
 }
 
@@ -412,7 +414,7 @@ void DrivingFollowPath::waitDriveComplete_FF()
 	cout << "Wait time [millisec]:" << waittime << endl;
 
 	Timer waitDriveTimer;
-	Sleep(1000);
+	//Sleep(1000);
 	waitDriveTimer.Start();
 	
 	while (waitDriveTimer.getLapTime(1, Timer::millisec, false) < waittime)
@@ -420,12 +422,9 @@ void DrivingFollowPath::waitDriveComplete_FF()
 		getEncoderCount();
 		checkEmergencyStop(waitDriveTimer);
 	}
-	
-	//Sleep(waittime);
 
 	leftCount = 0;
 	rightCount = 0;
-	//sendDrivingCommand(STOP);
 }
 
 void DrivingFollowPath::run_FF()

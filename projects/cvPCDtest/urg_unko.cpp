@@ -191,7 +191,6 @@ void urg_unko::calcSurface2D()
 			long l = data[i];	//取得した点までの距離
 			double radian;
 			float x, y, z;
-			float ideal_x, ideal_y;
 			float pointpos[3];
 
 			//異常値ならとばす
@@ -209,32 +208,7 @@ void urg_unko::calcSurface2D()
 			y = (float)(l * sin(radian));
 			z = urgpos[0];
 
-			ideal_x = +cos(this->radian + urgpos[3]) * x + sin(this->radian + urgpos[3]) * y;
-			ideal_y = -sin(this->radian + urgpos[3]) * x + cos(this->radian + urgpos[3]) * y;
-
-			// 左センサの領域判別
-			if (urgpos[2] < 0)
-			{
-				//if (ideal_x < 1000.0 && ideal_y < 150.0 && ideal_y > -150.0)
-				if (ideal_x < 1000.0)
-				{
-					count += 1;
-				}
-			}
-			// 右センサの領域判別
-			/*else if (urgpos[2] > 0)
-			{
-				if (ideal_x < 1000.0 && ideal_y < 150.0 && ideal_y > -150.0)
-				{
-					count += 1;
-				}
-			}*/
-			
-
 			//2次元平面の座標変換
-			//pointpos[0] = +cos(radian + urgpos[3]) * (x + distance - distance_old + urgpos[1]) + sin(radian + urgpos[3]) * (y + urgpos[2]) + currentCoord_x;
-			//pointpos[1] = -sin(radian + urgpos[3]) * (x + distance - distance_old + urgpos[1]) + cos(radian + urgpos[3]) * (y + urgpos[2]) + currentCoord_y;
-
 			//pointpos[0] = +cos(this->radian) * x + sin(this->radian) * y + cos(this->radian) * (distance - distance_old + urgpos[1]) + currentCoord_x;
 			//pointpos[1] = -sin(this->radian) * x + cos(this->radian) * y - sin(this->radian) * (distance - distance_old + urgpos[1]) + currentCoord_y;
 
@@ -243,12 +217,6 @@ void urg_unko::calcSurface2D()
 
 			pointpos[2] = z;
 
-		}
-		//１スキャン分のpcdファイルを保存
-		//pcdSave();
-		if (count > 8){
-			shMem.setShMemData(true, EMARGENCY);
-			//printf("点の数　= %d\n", count);
 		}
 	}
 }

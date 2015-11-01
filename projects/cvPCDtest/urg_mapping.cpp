@@ -33,7 +33,7 @@ void urg_mapping::setPCImageColor(PCImage::BGR bgr)
 {
 	pcimage.setColor(bgr);
 }
-void urg_mapping::writeMap(float& dist, float& old, float& rad)
+void urg_mapping::writeMap(float dist, float old, float rad)
 {
 	getData4URG(dist, old, rad);
 	for (int i = 0; i < data_n; i++){
