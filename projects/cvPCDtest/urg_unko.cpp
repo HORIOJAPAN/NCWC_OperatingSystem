@@ -3,14 +3,7 @@
 #include "urg_unko.h"
 #include "open_urg_sensor.c"
 
-
 using namespace std;
-
-// pcimageの引数．画像のサイズと解像度
-// main.cppでコマンドライン引数から受け取る
-extern int imgWidth, imgHeight, imgResolution;
-
-PCImage urg_unko::pcimage;
 
 /*
 *	概要:
@@ -26,7 +19,6 @@ urg_unko::urg_unko() //:pcimage(::imgWidth, ::imgHeight, ::imgResolution)
 	:shMem(SharedMemory<int>("unko"))
 {
 	COMport = 0;
-	pcdnum = 0;
 
 	shMem.reset();
 }
@@ -133,28 +125,26 @@ int urg_unko::getData4URG(float& dist,float& old, float& rad){
 		urg_deg2step(&urg, +90), 0);
 #endif
 
+	//積算した距離,回転角を格納
+	distance_old = old;
+	distance = dist;
+	radian = rad;
+
 	//測定の開始
 	urg_start_measurement(&urg, URG_DISTANCE, 1, 0);
 
 	for (int i = 0; i < CAPTURE_TIMES; ++i) {
-		int n;
-
 		//測定データの取得
-		n = urg_get_distance(&urg, data, &time_stamp);
-		if (n <= 0) {
+		data_n = urg_get_distance(&urg, data, &time_stamp);
+		if (data_n <= 0) {
 			printf("urg_get_distance: %s\n", urg_error(&urg));
 			free(data);
 			urg_close(&urg);
 			return 1;
 		}
 
-		//積算した距離,回転角を格納
-		distance_old = old;
-		distance = dist;
-		radian = rad;
-
 		//測定データからマップ，pcdファイルを作成
-		set_3D_surface(n);
+		calcSurface2D();
 	}
 
 	return 0;
@@ -169,10 +159,8 @@ int urg_unko::getData4URG(float& dist,float& old, float& rad){
 *	返り値:
 *		なし
 */
-void urg_unko::set_3D_surface(int data_n)
+void urg_unko::calcSurface2D()
 {
-	//printf(" set_3D_surface data_n = %d \n", data_n);
-
 	(void)time_stamp;
 
 	long min_distance;
@@ -192,6 +180,11 @@ void urg_unko::set_3D_surface(int data_n)
 		//rcvDroid.getOrientationData(droidOrientation);
 		//rcvDroid.getGPSData(droidGPS);
 
+		for (int i = 0; i < sizeof(pointpos); i++)
+		{
+			if (this->pointpos[i] != NULL)	delete[] this->pointpos[i];
+			this->pointpos[i] = new float[data_n];
+		}
 		//データの数だけ実際の座標を計算してマップ，pcdファイルに書き込む
 		for (int i = 0; i < data_n; ++i) {
 			long l = data[i];	//取得した点までの距離
@@ -213,40 +206,36 @@ void urg_unko::set_3D_surface(int data_n)
 			y = (float)(l * sin(radian));
 			z = 120.0;
 
-			if (x < 1000 && abs(y) < 1000)
-			{
-				shMem.setShMemData(true, EMARGENCY);
-			}
-
 			//2次元平面の座標変換
-			//pointpos[0] = +cos(radian + urgpos[3]) * (x + distance - distance_old + urgpos[1]) + sin(radian + urgpos[3]) * (y + urgpos[2]) + currentCoord_x;
-			//pointpos[1] = -sin(radian + urgpos[3]) * (x + distance - distance_old + urgpos[1]) + cos(radian + urgpos[3]) * (y + urgpos[2]) + currentCoord_y;
-
 			//pointpos[0] = +cos(this->radian) * x + sin(this->radian) * y + cos(this->radian) * (distance - distance_old + urgpos[1]) + currentCoord_x;
 			//pointpos[1] = -sin(this->radian) * x + cos(this->radian) * y - sin(this->radian) * (distance - distance_old + urgpos[1]) + currentCoord_y;
 
-			pointpos[0] = +cos(this->radian + urgpos[3]) * x + sin(this->radian + urgpos[3]) * y + cos(this->radian) * (distance - distance_old + urgpos[1]) + sin(this->radian) * urgpos[2] + currentCoord_x;
-			pointpos[1] = -sin(this->radian + urgpos[3]) * x + cos(this->radian + urgpos[3]) * y - sin(this->radian) * (distance - distance_old + urgpos[1]) + cos(this->radian) * urgpos[2] + currentCoord_y;
+			this->pointpos[0][i] = +cos(this->radian + urgpos[3]) * x + sin(this->radian + urgpos[3]) * y + cos(this->radian) * (distance - distance_old + urgpos[1]) + sin(this->radian) * urgpos[2] + currentCoord_x;
+			this->pointpos[1][i] = -sin(this->radian + urgpos[3]) * x + cos(this->radian + urgpos[3]) * y - sin(this->radian) * (distance - distance_old + urgpos[1]) + cos(this->radian) * urgpos[2] + currentCoord_y;
 
 			pointpos[2] = z;
-
-			
-
-			// 座標を保存
-#ifndef DEBUG_WRITELINE
-			// 点のみ書き込む
-			pcimage.writePoint(pointpos[0] / 1000, pointpos[1] / 1000);
-			pcdWrite(pointpos[0] / 1000, pointpos[1] / 1000);
-#else
-			// 点を書き込んで現在地からの直線を引く
-			pcimage.writePoint(pointpos[0] / 1000, pointpos[1] / 1000, currentCoord_x / 1000, currentCoord_y / 1000);
-			pcdWrite(pointpos[0] / 1000, pointpos[1] / 1000, currentCoord_x / 1000, currentCoord_y / 1000, droidOrientation, droidGPS);
-#endif
 
 		}
 		//１スキャン分のpcdファイルを保存
 		pcdSave();
 	}
+}
+void urg_unko::updateCurrentCoord(float coord_x, float coord_y)
+{
+	currentCoord_x = coord_x;
+	currentCoord_y = coord_y;
+}
+void urg_unko::updateCurrentCoord(float coordXY[])
+{
+	currentCoord_x = coordXY[0];
+	currentCoord_y = coordXY[1];
+}
+
+writePCD::writePCD(std::string dirName)
+{
+	pcdnum = 0;
+	isWritePCD = true;
+	this->dirname = dirName;
 }
 
 /*
@@ -257,10 +246,12 @@ void urg_unko::set_3D_surface(int data_n)
 *	返り値:
 *		なし
 */
-void urg_unko::pcdinit()
+void writePCD::pcdinit()
 {
+	if (!isWritePCD) return;
+
 	//ファイル名を指定してファイルストリームを開く
-	ofs.open("./" + pcimage.getDirname() + "/pointcloud_" + std::to_string(pcdnum) + ".pcd");
+	ofs.open("./" + dirname + "/pointcloud_" + std::to_string(pcdnum) + ".pcd");
 
 	//pcdファイル番号を進めてデータ数カウント用変数を初期化
 	pcdnum++;
@@ -289,14 +280,14 @@ void urg_unko::pcdinit()
 *	返り値:
 *		なし
 */
-void urg_unko::pcdWrite(float x, float y)
+void writePCD::pcdWrite(float x, float y)
 {
 	//データを書き込んでデータ数をカウント
 	ofs << x << " " << y << " " << "0.0" << endl;
 	pcdcount++;
 }
 
-void urg_unko::pcdWrite(float x, float y, float pos_x, float pos_y, float droidAngle[], float droidGPS[])
+void writePCD::pcdWrite(float x, float y, float pos_x, float pos_y, float droidAngle[], float droidGPS[])
 {
 	//データを書き込んでデータ数をカウント
 	ofs << x << ", " << y << ", " << pos_x << ", " << pos_y << ", " << droidAngle[0] << ", " << droidAngle[1] << ", " << droidAngle[2] << ", " << droidGPS[0] << ", " << droidGPS[1] << ", " << droidGPS[2] << ", " << endl;
@@ -311,7 +302,7 @@ void urg_unko::pcdWrite(float x, float y, float pos_x, float pos_y, float droidA
 *	返り値:
 *		なし
 */
-void urg_unko::pcdSave()
+void writePCD::pcdSave()
 {
 	//最終的なデータ数を追記
 	ofs.seekp(0, ios_base::beg);
@@ -331,38 +322,4 @@ void urg_unko::pcdSave()
 	//ファイルストリームを緘
 	ofs.close();
 	ofs.flush();
-}
-
-void urg_unko::setWriteLine(bool isLine)
-{
-	pcimage.isWriteLine = isLine;
-}
-
-std::string	urg_unko::getDirName()
-{
-	return pcimage.getDirname();
-}
-void urg_unko::updateCurrentCoord(float coord_x, float coord_y)
-{
-	currentCoord_x = coord_x;
-	currentCoord_y = coord_y;
-}
-void urg_unko::updateCurrentCoord(float coordXY[])
-{
-	currentCoord_x = coordXY[0];
-	currentCoord_y = coordXY[1];
-}
-
-void urg_unko::initPCImage(PCImage& pci)
-{
-	pcimage = pci;
-}
-void urg_unko::initPCImage(int width, int height, int resolution)
-{
-	pcimage.initPCImage(width,height, resolution);
-}
-
-void urg_unko::setPCImageColor(PCImage::BGR bgr)
-{
-	pcimage.setColor(bgr);
 }

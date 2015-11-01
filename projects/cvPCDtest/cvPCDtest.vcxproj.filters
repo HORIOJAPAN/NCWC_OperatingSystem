@@ -33,6 +33,9 @@
     <ClCompile Include="..\HJ_ReceiveAndroidSensors\receiveAndroidSensors.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="urg_mapping.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pcimage.h">

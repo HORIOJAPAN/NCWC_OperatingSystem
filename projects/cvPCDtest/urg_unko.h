@@ -26,21 +26,42 @@ void getArduinoHandle(int arduinoCOM, HANDLE& hComm);
 //urg_unkoのmainループ
 void getDataUNKOOrigin(int URG_COM[], float URGPOS[][4], int ARDUINO_COM, int NumOfURG);
 
+class writePCD
+{
+private:
+	std::ofstream ofs;	//ファイルストリームオブジェクト．pcdファイル作成に用いる
+	int pcdnum;			//pcdファイルの番号をカウントする変数
+	int pcdcount;		//pcdファイルに書き込む点の数をカウントする変数
+
+	std::string dirname;
+
+public:
+	bool isWritePCD;
+
+	writePCD(std::string dirName = "");
+	//pcdファイルを作成して書き込む準備を行う
+	void pcdinit();
+	//pcdファイルへ点を書き込む
+	void pcdWrite(float x, float y);
+	void pcdWrite(float x, float y, float pos_x, float pos_y, float droidAngle[], float droidGPS[]);
+	//pcdファイルへの書き込みを終了して保存する
+	void pcdSave();
+};
+
+
 /*
 *
 *　URGでデータを取得してマッピングを行うクラス
 *
 */
-class urg_unko{
-private:
+class urg_unko:
+	public writePCD
+{
+protected:
 	/*
 	*	メンバ変数
 	*/
 	int COMport;	//URGのCOMポート
-
-	std::ofstream ofs;	//ファイルストリームオブジェクト．pcdファイル作成に用いる
-	int pcdnum;			//pcdファイルの番号をカウントする変数
-	int pcdcount;		//pcdファイルに書き込む点の数をカウントする変数
 
 	//float urgpos[3];	
 	//NCWCの回転中心から見たURGの位置．センサの地面からの高さ，センサの基準位置からの距離，および水平面からの俯角
@@ -51,8 +72,6 @@ private:
 	urg_t urg;			//URGオブジェクト
 	long *data = NULL;	
 	long time_stamp;
-
-	static PCImage pcimage;	//マップ画像作成用クラス
 
 	float scaninterval = 0.0;//計測を実施する最低間隔[mm]
 
@@ -67,6 +86,9 @@ private:
 	SharedMemory<int> shMem;
 	enum {EMARGENCY};
 
+	float* pointpos[2];
+	int data_n;
+
 	/***********************
 	 *	privateなメソッド  *
 	 ***********************/
@@ -77,44 +99,40 @@ private:
 	int connectURG();
 
 	//取得したデータから実際の二次元情報を計算してマップ，pcdファイルへの書き込みを行う
-	void set_3D_surface(int data_n);
-
-	//pcdファイルを作成して書き込む準備を行う
-	void pcdinit();
-	//pcdファイルへ点を書き込む
-	void pcdWrite(float x, float y);
-	void pcdWrite(float x, float y, float pos_x, float pos_y, float droidAngle[], float droidGPS[]);
-	//pcdファイルへの書き込みを終了して保存する
-	void pcdSave();
+	void calcSurface2D();
 
 public:
 	/*
 	*	publicなメソッド
 	*/
-
 	//コンストラクタ
 	urg_unko();
 	//デストラクタ
 	~urg_unko();
-
-	void save();
 
 	//自身の初期化処理を行う
 	void init(int COM, float pos[]);
 	//URGからデータを取得するメソッド
 	int getData4URG(float& dist, float& old, float& rad);
 
-	void setWriteLine(bool isLine);
-	std::string	getDirName();
-
 	void updateCurrentCoord(float coord_x, float coord_y);
 	void updateCurrentCoord(float coordXY[]);
 
-	static void initPCImage( PCImage& pci );
-	static void initPCImage(int width, int height, int resolution);
-	void setPCImageColor(PCImage::BGR bgr);
-
 };
 
+class urg_mapping : 
+	public urg_unko
+{
+private:
+	static PCImage pcimage;	//マップ画像作成用クラス
+
+public:
+	void setWriteLine(bool isLine);
+	std::string	getDirName();
+
+	static void initPCImage(PCImage& pci);
+	static void initPCImage(int width, int height, int resolution);
+	void setPCImageColor(PCImage::BGR bgr);
+};
 
 #endif
