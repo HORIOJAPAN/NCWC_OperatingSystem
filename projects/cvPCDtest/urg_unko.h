@@ -135,6 +135,8 @@ public:
 	static void initPCImage(PCImage& pci);
 	static void initPCImage(int width, int height, int resolution);
 	void setPCImageColor(PCImage::BGR bgr);
+
+	void writeMap(float& dist, float& old, float& rad);
 };
 
 #endif

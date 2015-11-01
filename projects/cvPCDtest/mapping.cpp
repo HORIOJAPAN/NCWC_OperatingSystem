@@ -268,7 +268,7 @@ void getDataUNKOOrigin(int URG_COM[], float URGPOS[][4], int ARDUINO_COM, int Nu
 		{
 			unkoArray[i].updateCurrentCoord(currentCoord);
 			unkoArray[i].setPCImageColor(color[i]);
-			unkoArray[i].getData4URG(dist,chairdist_old, rad);
+			unkoArray[i].writeMap(dist,chairdist_old, rad);
 		}
 		
 		//Œ»İ‚ÌˆÊ’u‚ğXV
