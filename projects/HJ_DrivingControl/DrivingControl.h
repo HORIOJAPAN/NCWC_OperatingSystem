@@ -94,6 +94,7 @@ private:
 	void waitDriveComplete_FF();
 
 	int waittime;
+	Direction preDirection;
 	Direction nowDirection;
 
 	void checkEmergencyStop(Timer& timer);

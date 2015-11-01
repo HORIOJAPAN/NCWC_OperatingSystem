@@ -260,8 +260,9 @@ void DrivingFollowPath::sendDrivingCommand(Direction direction, int delay_int)
 {
 	int mode = 1;
 
-	if (direction != STOP) nowDirection = direction;
-	waittime = delay_int;
+	preDirection = nowDirection;
+	nowDirection = direction;
+	if(delay_int != 99999 && delay_int != 0)waittime = delay_int;
 
 	switch (direction)
 	{
@@ -359,7 +360,8 @@ void DrivingFollowPath::waitDriveComplete()
 
 void DrivingFollowPath::restart(int time , Timer& timer )
 {
-	sendDrivingCommand(nowDirection, waittime - time);
+	if(nowDirection != STOP) sendDrivingCommand(nowDirection, waittime - time);
+	else sendDrivingCommand(preDirection, waittime - time);
 	//Sleep(1000);
 	timer.getLapTime();
 }
@@ -371,13 +373,13 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 
 	int time = timer.getLapTime(1, Timer::millisec, false) - 1000;
 	if (time < 0) time = 0;
-	/*
+	
 	cout << time << "millisec" << endl;
 	cout << time * abs(aimCount_L) << "," << abs(leftCount) * waittime << endl;
 	cout << leftCount << "," << rightCount << endl;
 	cout << aimCount_L << "," << aimCount_R << endl;
 	cout << waittime << endl;
-    */
+    
 	
 
 	if (((float)time + 1000) / (float)waittime * 100 > 98 ) return;
@@ -385,7 +387,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 	if (time * abs(aimCount_L) > abs(leftCount) * waittime)     left = true;
 	if (time * abs(aimCount_R) > abs(rightCount) * waittime)    right = true;
 
-	if (left && right)
+	if (left && right&& nowDirection != STOP)
 	{
 		cout << "非常停止してるかも" << endl;
 		DrivingControl::sendDrivingCommand(1, 0, 0, 0);
@@ -396,17 +398,19 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 	}
 	if (urgdArray[0].checkObstacle() || urgdArray[1].checkObstacle())
 	{
-		sendDrivingCommand(STOP);
-		if (MessageBoxA(NULL, "動いてもいい？？", "もしかしてなんか危ない？？", MB_YESNO | MB_ICONSTOP) == IDYES)
-            restart(time, timer);
+		if(nowDirection != STOP) sendDrivingCommand(STOP);
+		//if (MessageBoxA(NULL, "動いてもいい？？", "もしかしてなんか危ない？？", MB_YESNO | MB_ICONSTOP) == IDYES)  restart(time, timer);
 
 		isObstacle = true;
+
+		while (urgdArray[0].checkObstacle() || urgdArray[1].checkObstacle());
+		restart(time, timer);
 	}
-	else if (isObstacle)
+	/*else if (isObstacle)
 	{
 		isObstacle = false;
 		restart(time, timer);
-	}
+	}*/
 }
 
 void DrivingFollowPath::waitDriveComplete_FF()
@@ -502,8 +506,8 @@ urg_driving::ObstacleEmergency urg_driving::checkObstacle()
 		y = (float)(l * sin(radian));
 		z = urgpos[0];
 
-		ideal_x = l * cos(radian - urgpos[3]);
-		ideal_y = l * sin(radian - urgpos[3]);
+		ideal_x = (float)(l * cos(radian - (double)urgpos[3]));
+		ideal_y = (float)(l * sin(radian - (double)urgpos[3]));
 
 		// 左センサの領域判別
 		if (urgpos[2] < 0)
