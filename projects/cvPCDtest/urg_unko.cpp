@@ -120,7 +120,7 @@ int urg_unko::connectURG(){
 *	返り値:
 *		0
 */
-int urg_unko::getData4URG(float& dist,float& old, float& rad){
+int urg_unko::getData4URG(float dist,float old, float rad){
 	//データ取得
 #if 1
 	//データの取得範囲を変更する場合
@@ -176,9 +176,6 @@ void urg_unko::calcSurface2D()
 		//正常に取得されるデータの最大値，最小値を取得
 		urg_distance_min_max(&urg, &min_distance, &max_distance);
 
-		//pcdファイルの初期化
-		//pcdinit();
-
 		float droidOrientation[3] = {};
 		float droidGPS[3] = {};
 		//rcvDroid.getOrientationData(droidOrientation);
@@ -233,8 +230,6 @@ void urg_unko::calcSurface2D()
 			pointpos[2] = z;
 
 		}
-		//１スキャン分のpcdファイルを保存
-		//pcdSave();
 	}
 }
 void urg_unko::updateCurrentCoord(float coord_x, float coord_y)
@@ -247,6 +242,16 @@ void urg_unko::updateCurrentCoord(float coordXY[])
 	currentCoord_x = coordXY[0];
 	currentCoord_y = coordXY[1];
 }
+void urg_unko::savePCD()
+{
+	pcd.pcdinit();
+	for (int i = 0; i < data_n; i++)
+	{
+		pcd.pcdWrite(pointpos[0][i] / 1000, pointpos[1][i] / 1000, currentCoord_x / 1000, currentCoord_y / 1000);
+	}
+	pcd.pcdSave();
+}
+
 
 int writePCD::pcdnum = 0;
 
@@ -300,6 +305,8 @@ void writePCD::pcdinit()
 */
 void writePCD::pcdWrite(float x, float y)
 {
+	if (!isWritePCD) return;
+
 	//データを書き込んでデータ数をカウント
 	ofs << x << " " << y << " " << "0.0" << endl;
 	pcdcount++;
@@ -307,11 +314,20 @@ void writePCD::pcdWrite(float x, float y)
 
 void writePCD::pcdWrite(float x, float y, float pos_x, float pos_y, float droidAngle[], float droidGPS[])
 {
+	if (!isWritePCD) return;
+
 	//データを書き込んでデータ数をカウント
 	ofs << x << ", " << y << ", " << pos_x << ", " << pos_y << ", " << droidAngle[0] << ", " << droidAngle[1] << ", " << droidAngle[2] << ", " << droidGPS[0] << ", " << droidGPS[1] << ", " << droidGPS[2] << ", " << endl;
 	pcdcount++;
 }
+void writePCD::pcdWrite(float x, float y, float pos_x, float pos_y)
+{
+	if (!isWritePCD) return;
 
+	//データを書き込んでデータ数をカウント
+	ofs << x << ", " << y << ", " << pos_x << ", " << pos_y << ", " << endl;
+	pcdcount++;
+}
 /*
 *	概要:
 *		ファイルストリームを閉じて保存する
@@ -322,6 +338,8 @@ void writePCD::pcdWrite(float x, float y, float pos_x, float pos_y, float droidA
 */
 void writePCD::pcdSave()
 {
+	if (!isWritePCD) return;
+
 	//最終的なデータ数を追記
 	ofs.seekp(0, ios_base::beg);
 

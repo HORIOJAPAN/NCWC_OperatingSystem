@@ -43,6 +43,7 @@ public:
 	void pcdinit();
 	//pcdファイルへ点を書き込む
 	void pcdWrite(float x, float y);
+	void pcdWrite(float x, float y, float pos_x, float pos_y);
 	void pcdWrite(float x, float y, float pos_x, float pos_y, float droidAngle[], float droidGPS[]);
 	//pcdファイルへの書き込みを終了して保存する
 	void pcdSave();
@@ -55,8 +56,7 @@ public:
 *　URGでデータを取得してマッピングを行うクラス
 *
 */
-class urg_unko:
-	public writePCD
+class urg_unko
 {
 protected:
 	/*
@@ -90,6 +90,8 @@ protected:
 	float* pointpos[2];
 	int data_n;
 
+	writePCD pcd;
+
 	/***********************
 	 *	privateなメソッド  *
 	 ***********************/
@@ -114,7 +116,9 @@ public:
 	//自身の初期化処理を行う
 	void init(int COM, float pos[]);
 	//URGからデータを取得するメソッド
-	int getData4URG(float& dist, float& old, float& rad);
+	int getData4URG(float dist, float old, float rad);
+
+	void savePCD();
 
 	void updateCurrentCoord(float coord_x, float coord_y);
 	void updateCurrentCoord(float coordXY[]);

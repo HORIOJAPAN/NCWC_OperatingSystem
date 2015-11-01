@@ -2,23 +2,9 @@
  *	経路情報のテキストファイル(拡張子.rt)を上から順に読み込んで移動距離，回転を計算し，
  *	シリアル通信で駆動指令を送信する．
  */
-
-#include <fstream>
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <iomanip>
-#include <Windows.h>
-
-#include "../Timer/Timer.h"
-#include "../SharedMemoryTESTpp/SharedMemory.h"
+#include "DrivingControl.h"
 
 #define PI 3.14159265359
-
-using namespace std;
-
-const int ENCODER_COM = 10;
-const int CONTROLLER_COM = 9;
 
 /*
 *	概要:
@@ -28,7 +14,7 @@ const int CONTROLLER_COM = 9;
 *	返り値:
 *		なし
 */
-void getArduinoHandle(int arduinoCOM, HANDLE& hComm , int timeoutmillisec = 0)
+void getArduinoHandle(int arduinoCOM, HANDLE& hComm , int timeoutmillisec )
 {
 	//シリアルポートを開いてハンドルを取得
 	string com = "\\\\.\\COM" + to_string(arduinoCOM);
@@ -59,250 +45,13 @@ void getArduinoHandle(int arduinoCOM, HANDLE& hComm , int timeoutmillisec = 0)
 
 	}
 }
-
-class DrivingControl
+void DrivingControl::setControllerCOM(int ctrlerCOM)
 {
-private:	
-	// 経路データ読み取り用変数
-	const string	fileName;			// 経路ファイル名
-	const string	searchWord = ",";	// データの区切り識別用の","
-
-	ifstream	ifs;					// ファイルストリーム
-
-	// ベクトルを2つ使用する為3点保存する
-	int	x_old, y_old;					// 1つ前の座標
-	int x_now, y_now;					// 現在の座標
-	int	x_next = 0, y_next = 0;			// 次の座標
-
-	string	str, x_str, y_str;		// データ読み取りに使用する変数
-	string::size_type	x_pos, y_pos;
-
-	// 駆動指令計算用変数
-	double	orientation;			// 現在向いている方位角(スタート直後を0として右向きが正)
-	double	radian;					// 計算後の回転角
-	double	distance;				// 計算後の移動距離
-
-	const int wheelDistance = 530 / 2;	// タイヤ間距離の半分[mm]
-	//const double dDISTANCE = 24.87094184; // 1カウント当たりの距離[mm](タイヤ径を72分割)
-	const double dDISTANCE = 1; // 1カウント当たりの距離[mm](タイヤ径を72分割)
-
-	const double leftCoefficient;
-	const double rightCoefficient;
-
-	// エンコーダの値関連
-	int		encoderCOM;
-	HANDLE	hEncoderComm;
-	bool	isEncoderInitialized = false;
-	int		leftCount, rightCount;
-
-	// Arduinoへの駆動指令関連
-	int		controllerCOM;
-	HANDLE	hControllerComm;
-	enum Direction	{ STOP, FORWARD, BACKWARD , RIGHT , LEFT };
-	int		aimCount_L, aimCount_R;
-
-	SharedMemory<int> shMem;
-	enum { EMERGENCY , SIZEOFENUM };
-
-	bool retLastSend;
-	bool retLastRead;
-
-
-	/// エンコーダからカウント数を取得して積算する
-	void getEncoderCount();
-	///  Arduinoへ駆動指令を送信
-	void sendDrivingCommand(int mode_int, int forward_int, int  crosswise_int, int delay_int);
-	void sendDrivingCommand(Direction direction , int delay_int = 99999);
-	void sendDrivingCommand_count(Direction direction, int count);
-	/// 指令した駆動の完了を待機
-	void waitDriveComplete();
-	void waitDriveComplete_FF();
-
-	int waittime;
-	Direction nowDirection;
-
-	void checkEmergencyStop(Timer& timer);
-	int askIsDriving();
-
-public:
-	// もろもろの初期化処理
-	DrivingControl(string fname, double coefficientL, double coefficientR, int arduioCOM, int ctrlrCOM);
-
-	// 次の点を読み込む
-	bool getNextPoint();
-
-	// 回転角を計算
-	void	calcRotationAngle();
-	// 距離を計算
-	void	calcMovingDistance();
-
-	void	run();
-	void	run_FF();
-};
-
-/*
- * コンストラクタ
- * 経路ファイルを読み込んでヘッダをとばす
- */
-DrivingControl::DrivingControl(string fname, double coefficientL, double coefficientR, int ecdrCOM , int ctrlrCOM)
-	: fileName(fname), leftCoefficient(coefficientL), rightCoefficient(coefficientR), encoderCOM(ecdrCOM), controllerCOM(ctrlrCOM),
-	shMem(SharedMemory<int>("unko"))
-{
-	// 経路データを読み込む
-	ifs.open(fileName);
-	if (ifs.fail())
-	{
-		cerr << "False" << endl;
-		return;
-	}
-	// ヘッダ部分をとばす
-	getline(ifs, str);
-
-	// 原点を取得しておく
-	getNextPoint();
-
-	// 初めの回転角計算用として原点の少し後方に点を追加
-	x_now = x_next - 5;
-	y_now = y_next;
-
-	getArduinoHandle(encoderCOM, hEncoderComm);
-	getArduinoHandle(controllerCOM, hControllerComm,500);
-
-	shMem.reset();
-	shMem.setShMemData(false, EMERGENCY);
-
+	this->controllerCOM = ctrlerCOM;
+	getArduinoHandle(controllerCOM, hControllerComm, 500);
 }
 
-/*
- * 次の点を読み込む
- */
-bool DrivingControl::getNextPoint()
-{
-	// 古い座標を保存
-	x_old = x_now;
-	y_old = y_now;
-	x_now = x_next;
-	y_now = y_next;
-
-	// 次の行が存在しなければfalseを返す
-	if (!getline(ifs, str)) return false;
-
-	//先頭から","までの文字列をint型で取得
-	x_pos = str.find(searchWord);
-	if (x_pos != string::npos){
-		x_str = str.substr(0, x_pos);
-		x_next = stoi(x_str);
-	}
-
-	//xの値の後ろから","までの文字列をint型で取得
-	y_pos = str.find(searchWord, x_pos + 1);
-	if (y_pos != string::npos){
-		y_str = str.substr(x_pos + 1, y_pos);
-		y_next = stoi(y_str);
-	}
-	cout << x_next << "," << y_next << endl;
-
-	return true;
-}
-
-void DrivingControl::getEncoderCount()
-{
-	unsigned char	sendbuf[1];
-	unsigned char	receive_data[2];
-	unsigned long	len;
-
-	// バッファクリア
-	memset(sendbuf, 0x01, sizeof(sendbuf));
-	// 通信バッファクリア
-	PurgeComm(hEncoderComm, PURGE_RXCLEAR);
-	// 送信
-	WriteFile(hEncoderComm, &sendbuf, 1, &len, NULL);
-	// バッファクリア
-	memset(receive_data, 0x00, sizeof(receive_data));
-	// 通信バッファクリア
-	PurgeComm(hEncoderComm, PURGE_RXCLEAR);
-	// Arduinoからデータを受信
-	ReadFile(hEncoderComm, &receive_data, 2, &len, NULL);
-	
-
-	//初期化されていなければ初期化(初めのデータを捨てる)
-	if (!isEncoderInitialized)
-	{
-		isEncoderInitialized = true;
-		return;
-	}
-
-	leftCount += (signed char)receive_data[0];
-	rightCount += (signed char)receive_data[1];
-	//cout << "L:" << leftCount << ",R:" << rightCount << endl;
-}
-
-void DrivingControl::sendDrivingCommand_count( Direction direction , int count)
-{
-	if ( count < 0) count *= -1;
-
-	switch (direction)
-	{
-	case STOP:
-		sendDrivingCommand(STOP);
-		break;
-
-	case FORWARD:
-		sendDrivingCommand(FORWARD, count / 9.0 * 1000);
-		break;
-
-	case BACKWARD:
-		sendDrivingCommand(BACKWARD,count / 3.125 * 1000);
-		break;
-
-	case RIGHT:
-		sendDrivingCommand(RIGHT, count / 10.875 * 1000);
-		break;
-
-	case LEFT:
-		sendDrivingCommand(LEFT, count / 10.25 * 1000);
-		break;
-
-	default:
-		break;
-	}
-}
-
-void DrivingControl::sendDrivingCommand(Direction direction, int delay_int)
-{
-	int mode = 1;
-
-	if (direction != STOP) nowDirection = direction;
-
-	switch (direction)
-	{
-	case STOP:
-		mode = 0;
-		sendDrivingCommand(mode, 0, 0, delay_int);
-		break;
-
-	case FORWARD:
-		sendDrivingCommand(mode, -1000, 405, delay_int);
-		break;
-
-	case BACKWARD:
-		sendDrivingCommand(mode, 600, 509, delay_int);
-		break;
-
-	case RIGHT:
-		sendDrivingCommand(mode, -380, -1500, delay_int);
-		break;
-
-	case LEFT:
-		sendDrivingCommand(mode, 0, 1500, delay_int);
-		break;
-
-	default:
-		break;
-	}
-}
-
-void DrivingControl::sendDrivingCommand(int mode_int,int forward_int, int  crosswise_int , int delay_int)
+void DrivingControl::sendDrivingCommand(int mode_int, int forward_int, int  crosswise_int, int delay_int)
 {
 	unsigned char	sendbuf[18];
 	unsigned char	receive_data[18];
@@ -337,7 +86,6 @@ void DrivingControl::sendDrivingCommand(int mode_int,int forward_int, int  cross
 
 	delay_sout << setfill('0') << setw(5) << delay_int;
 	delay_str = delay_sout.str();
-	if (delay_int)	waittime = delay_int;
 
 	// バッファクリア
 	memset(sendbuf, 0x00, sizeof(sendbuf));
@@ -382,8 +130,170 @@ void DrivingControl::sendDrivingCommand(int mode_int,int forward_int, int  cross
 }
 
 
+/*
+ * コンストラクタ
+ * 経路ファイルを読み込んでヘッダをとばす
+ */
+DrivingFollowPath::DrivingFollowPath(string fname, double coefficientL, double coefficientR, int ecdrCOM , int ctrlrCOM)
+	: fileName(fname), leftCoefficient(coefficientL), rightCoefficient(coefficientR), encoderCOM(ecdrCOM)
+{
+	controllerCOM = ctrlrCOM;
+
+	// 経路データを読み込む
+	ifs.open(fileName);
+	if (ifs.fail())
+	{
+		cerr << "False" << endl;
+		return;
+	}
+	// ヘッダ部分をとばす
+	getline(ifs, str);
+
+	// 原点を取得しておく
+	getNextPoint();
+
+	// 初めの回転角計算用として原点の少し後方に点を追加
+	x_now = x_next - 5;
+	y_now = y_next;
+
+	getArduinoHandle(encoderCOM, hEncoderComm, 0);
+	setControllerCOM(controllerCOM);
+
+}
+
+/*
+ * 次の点を読み込む
+ */
+bool DrivingFollowPath::getNextPoint()
+{
+	// 古い座標を保存
+	x_old = x_now;
+	y_old = y_now;
+	x_now = x_next;
+	y_now = y_next;
+
+	// 次の行が存在しなければfalseを返す
+	if (!getline(ifs, str)) return false;
+
+	//先頭から","までの文字列をint型で取得
+	x_pos = str.find(searchWord);
+	if (x_pos != string::npos){
+		x_str = str.substr(0, x_pos);
+		x_next = stoi(x_str);
+	}
+
+	//xの値の後ろから","までの文字列をint型で取得
+	y_pos = str.find(searchWord, x_pos + 1);
+	if (y_pos != string::npos){
+		y_str = str.substr(x_pos + 1, y_pos);
+		y_next = stoi(y_str);
+	}
+	cout << x_next << "," << y_next << endl;
+
+	return true;
+}
+
+void DrivingFollowPath::getEncoderCount()
+{
+	unsigned char	sendbuf[1];
+	unsigned char	receive_data[2];
+	unsigned long	len;
+
+	// バッファクリア
+	memset(sendbuf, 0x01, sizeof(sendbuf));
+	// 通信バッファクリア
+	PurgeComm(hEncoderComm, PURGE_RXCLEAR);
+	// 送信
+	WriteFile(hEncoderComm, &sendbuf, 1, &len, NULL);
+	// バッファクリア
+	memset(receive_data, 0x00, sizeof(receive_data));
+	// 通信バッファクリア
+	PurgeComm(hEncoderComm, PURGE_RXCLEAR);
+	// Arduinoからデータを受信
+	ReadFile(hEncoderComm, &receive_data, 2, &len, NULL);
+	
+
+	//初期化されていなければ初期化(初めのデータを捨てる)
+	if (!isEncoderInitialized)
+	{
+		isEncoderInitialized = true;
+		return;
+	}
+
+	leftCount += (signed char)receive_data[0];
+	rightCount += (signed char)receive_data[1];
+	//cout << "L:" << leftCount << ",R:" << rightCount << endl;
+}
+
+void DrivingFollowPath::sendDrivingCommand_count( Direction direction , int count)
+{
+	if ( count < 0) count *= -1;
+
+	switch (direction)
+	{
+	case STOP:
+		sendDrivingCommand(STOP);
+		break;
+
+	case FORWARD:
+		sendDrivingCommand(FORWARD, count / 9.0 * 1000);
+		break;
+
+	case BACKWARD:
+		sendDrivingCommand(BACKWARD,count / 3.125 * 1000);
+		break;
+
+	case RIGHT:
+		sendDrivingCommand(RIGHT, count / 10.875 * 1000);
+		break;
+
+	case LEFT:
+		sendDrivingCommand(LEFT, count / 10.25 * 1000);
+		break;
+
+	default:
+		break;
+	}
+}
+
+void DrivingFollowPath::sendDrivingCommand(Direction direction, int delay_int)
+{
+	int mode = 1;
+
+	if (direction != STOP) nowDirection = direction;
+
+	switch (direction)
+	{
+	case STOP:
+		mode = 0;
+		DrivingControl::sendDrivingCommand(mode, 0, 0, delay_int);
+		break;
+
+	case FORWARD:
+		DrivingControl::sendDrivingCommand(mode, -1000, 405, delay_int);
+		break;
+
+	case BACKWARD:
+		DrivingControl::sendDrivingCommand(mode, 600, 509, delay_int);
+		break;
+
+	case RIGHT:
+		DrivingControl::sendDrivingCommand(mode, -380, -1500, delay_int);
+		break;
+
+	case LEFT:
+		DrivingControl::sendDrivingCommand(mode, 0, 1500, delay_int);
+		break;
+
+	default:
+		break;
+	}
+}
+
+
+
 // 外積で回転角を計算
-void	DrivingControl::calcRotationAngle()
+void	DrivingFollowPath::calcRotationAngle()
 {
 	// 3点からベクトルを2つ用意
 	int vector1_x, vector1_y;
@@ -419,7 +329,7 @@ void	DrivingControl::calcRotationAngle()
 }
 
 // 距離を計算
-void	DrivingControl::calcMovingDistance()
+void	DrivingFollowPath::calcMovingDistance()
 {
 	double	x_disp = x_next - x_now;
 	double	y_disp = y_next - y_now;
@@ -435,7 +345,7 @@ void	DrivingControl::calcMovingDistance()
 
 }
 
-void DrivingControl::waitDriveComplete()
+void DrivingFollowPath::waitDriveComplete()
 {
 	while (abs(leftCount) < abs(aimCount_L) && abs(rightCount) < abs(aimCount_R))
 	{
@@ -445,13 +355,8 @@ void DrivingControl::waitDriveComplete()
 	rightCount = 0;
 	sendDrivingCommand(STOP);
 }
-int DrivingControl::askIsDriving()
-{
-	sendDrivingCommand(1, 0, 0, 0);
-	return 0;
-}
 
-void DrivingControl::checkEmergencyStop(Timer& timer)
+void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 {
 	bool left = false;
 	bool right = false;
@@ -479,18 +384,17 @@ void DrivingControl::checkEmergencyStop(Timer& timer)
 	if (left && right )
 	{
 		cout << "非常停止してるかも" << endl;
-		sendDrivingCommand(1, 0, 0, 0);
+		DrivingControl::sendDrivingCommand(1, 0, 0, 0);
 		if (retLastRead){
 			if (MessageBoxA(NULL, "もしかして非常停止してる？？\n動いてもいい？？", "もしかして！", MB_YESNO | MB_ICONSTOP) == IDYES)
 			{
 				sendDrivingCommand(nowDirection, waittime - time);
 				Sleep(1000);
 				timer.getLapTime();
-				shMem.setShMemData(false, EMERGENCY);
 			}
 		}
 	}
-	if (shMem.getShMemData(EMERGENCY))
+	if (urgdArray[0].checkObstacle() || urgdArray[1].checkObstacle())
 	{
 		sendDrivingCommand(STOP);
 		if (MessageBoxA(NULL, "動いてもいい？？", "もしかしてなんか危ない？？", MB_YESNO | MB_ICONSTOP) == IDYES)
@@ -498,12 +402,11 @@ void DrivingControl::checkEmergencyStop(Timer& timer)
 			sendDrivingCommand(nowDirection, waittime - time);
 			Sleep(1000);
 			timer.getLapTime();
-			shMem.setShMemData(false, EMERGENCY);
 		}
 	}
 }
 
-void DrivingControl::waitDriveComplete_FF()
+void DrivingFollowPath::waitDriveComplete_FF()
 {
 	cout << "Wait time [millisec]:" << waittime << endl;
 
@@ -524,7 +427,7 @@ void DrivingControl::waitDriveComplete_FF()
 	//sendDrivingCommand(STOP);
 }
 
-void DrivingControl::run_FF()
+void DrivingFollowPath::run_FF()
 {
 	getEncoderCount();
 
@@ -547,7 +450,7 @@ void DrivingControl::run_FF()
 		Sleep(500);
 	}
 }
-void DrivingControl::run()
+void DrivingFollowPath::run()
 {
 	getEncoderCount();
 
@@ -569,10 +472,61 @@ void DrivingControl::run()
 	}
 }
 
-void main()
+void DrivingFollowPath::setURGParam(int URG_COM[], float URGPOS[][4], int NumOfURG)
 {
-	DrivingControl DC("../../data/route/test09.rt", 24.0086517664 / 1.005, 23.751783167, ENCODER_COM, CONTROLLER_COM);
-	DC.run_FF();
+	urgdArray = new urg_driving[NumOfURG];
+	for (int i = 0; i < NumOfURG; i++)
+	{
+		urgdArray[i].init(URG_COM[i], URGPOS[i]);
+	}
+}
 
-	cout << "complete" << endl;
+urg_driving::ObstacleEmergency urg_driving::checkObstacle()
+{
+	this->urg_unko::getData4URG(0, 0, 0);
+
+	int count = 0;
+	for (int i = 0; i < data_n; ++i) {
+		long l = data[i];	//取得した点までの距離
+		double radian;
+		float x, y, z;
+		float ideal_x, ideal_y;
+
+		//異常値ならとばす
+		if (!this->pointpos[0][i] && !this->pointpos[1][i])	continue;
+
+		//点までの角度を取得してxyに変換
+		//(極座標で取得されるデータをデカルト座標に変換)
+		radian = urg_index2rad(&urg, i);
+		x = (float)(l * cos(radian));
+		y = (float)(l * sin(radian));
+		z = urgpos[0];
+
+		ideal_x = +cos(this->radian + urgpos[3]) * x + sin(this->radian + urgpos[3]) * y;
+		ideal_y = -sin(this->radian + urgpos[3]) * x + cos(this->radian + urgpos[3]) * y;
+
+		if (ideal_x < 1000 && abs(ideal_y) < 200)
+			// 左センサの領域判別
+			if (urgpos[2] < 0)
+			{
+				//if (ideal_x < 1000.0 && ideal_y < 150.0 && ideal_y > -150.0)
+				if (ideal_x < 1000.0)
+				{
+					count += 1;
+				}
+			}
+		// 右センサの領域判別
+		/*else if (urgpos[2] > 0)
+		{
+		if (ideal_x < 1000.0 && ideal_y < 150.0 && ideal_y > -150.0)
+		{
+		count += 1;
+		}
+		}*/
+		if (count > 8){
+			return DETECT;
+			//printf("点の数　= %d\n", count);
+		}
+		return NONE;
+	}
 }
