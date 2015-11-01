@@ -14,6 +14,11 @@ std::string	urg_mapping::getDirName()
 {
 	return pcimage.getDirname();
 }
+void urg_mapping::setPCDDir(std::string dirname)
+{
+	if (dirname == "") setDirName(getDirName());
+	else setDirName(dirname);
+}
 
 void urg_mapping::initPCImage(PCImage& pci)
 {

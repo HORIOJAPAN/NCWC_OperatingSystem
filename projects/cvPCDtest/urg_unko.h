@@ -30,7 +30,7 @@ class writePCD
 {
 private:
 	std::ofstream ofs;	//ファイルストリームオブジェクト．pcdファイル作成に用いる
-	int pcdnum;			//pcdファイルの番号をカウントする変数
+	static int pcdnum;			//pcdファイルの番号をカウントする変数
 	int pcdcount;		//pcdファイルに書き込む点の数をカウントする変数
 
 	std::string dirname;
@@ -46,6 +46,7 @@ public:
 	void pcdWrite(float x, float y, float pos_x, float pos_y, float droidAngle[], float droidGPS[]);
 	//pcdファイルへの書き込みを終了して保存する
 	void pcdSave();
+	void setDirName(std::string dirname);
 };
 
 
@@ -129,6 +130,7 @@ private:
 public:
 	void setWriteLine(bool isLine);
 	std::string	getDirName();
+	void setPCDDir(std::string dirname = "");
 
 	static void initPCImage(PCImage& pci);
 	static void initPCImage(int width, int height, int resolution);

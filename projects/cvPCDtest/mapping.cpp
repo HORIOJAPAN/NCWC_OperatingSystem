@@ -239,6 +239,7 @@ void getDataUNKOOrigin(int URG_COM[], float URGPOS[][4], int ARDUINO_COM, int Nu
 	{
 		unkoArray[i].init(URG_COM[i], URGPOS[i]);
 		unkoArray[i].setWriteLine(false);
+		unkoArray[i].setPCDDir();
 	}
 
 	/*********************

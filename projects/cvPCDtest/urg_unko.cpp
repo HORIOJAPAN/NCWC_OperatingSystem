@@ -45,6 +45,10 @@ void urg_unko::init(int COM, float pos[])
 	{
 		urgpos[i] = pos[i];
 	}
+	for (int i = 0; i < sizeof(pointpos); i++)
+	{
+		this->pointpos[i] = NULL;
+	}
 }
 
 /*
@@ -173,14 +177,14 @@ void urg_unko::calcSurface2D()
 		urg_distance_min_max(&urg, &min_distance, &max_distance);
 
 		//pcdファイルの初期化
-		pcdinit();
+		//pcdinit();
 
 		float droidOrientation[3] = {};
 		float droidGPS[3] = {};
 		//rcvDroid.getOrientationData(droidOrientation);
 		//rcvDroid.getGPSData(droidGPS);
 
-		for (int i = 0; i < sizeof(pointpos); i++)
+		for (int i = 0; i < 2; i++)
 		{
 			if (this->pointpos[i] != NULL)	delete[] this->pointpos[i];
 			this->pointpos[i] = new float[data_n];
@@ -195,7 +199,6 @@ void urg_unko::calcSurface2D()
 
 			//異常値ならとばす
 			if ((l <= min_distance) || (l >= max_distance)) {
-				pcdWrite(0, 0, currentCoord_x / 1000, currentCoord_y / 1000, droidOrientation, droidGPS);
 				continue;
 				l = max_distance;
 			}
@@ -229,7 +232,7 @@ void urg_unko::calcSurface2D()
 
 		}
 		//１スキャン分のpcdファイルを保存
-		pcdSave();
+		//pcdSave();
 	}
 }
 void urg_unko::updateCurrentCoord(float coord_x, float coord_y)
@@ -243,9 +246,10 @@ void urg_unko::updateCurrentCoord(float coordXY[])
 	currentCoord_y = coordXY[1];
 }
 
+int writePCD::pcdnum = 0;
+
 writePCD::writePCD(std::string dirName)
 {
-	pcdnum = 0;
 	isWritePCD = true;
 	this->dirname = dirName;
 }
@@ -263,7 +267,7 @@ void writePCD::pcdinit()
 	if (!isWritePCD) return;
 
 	//ファイル名を指定してファイルストリームを開く
-	ofs.open("./" + dirname + "/pointcloud_" + std::to_string(pcdnum) + ".pcd");
+	ofs.open("./" + dirname + "/pointcloud_" + std::to_string(pcdnum) + ".pcd",std::ios::out);
 
 	//pcdファイル番号を進めてデータ数カウント用変数を初期化
 	pcdnum++;
@@ -334,4 +338,8 @@ void writePCD::pcdSave()
 	//ファイルストリームを緘
 	ofs.close();
 	ofs.flush();
+}
+void writePCD::setDirName(std::string dirname)
+{
+	this->dirname = dirname;
 }
