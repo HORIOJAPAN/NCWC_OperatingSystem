@@ -199,6 +199,8 @@ void urg_unko::calcSurface2D()
 
 			//ˆÙí’l‚È‚ç‚Æ‚Î‚·
 			if ((l <= min_distance) || (l >= max_distance)) {
+				this->pointpos[0][i] = 0;
+				this->pointpos[1][i] = 0;
 				continue;
 				l = max_distance;
 			}
