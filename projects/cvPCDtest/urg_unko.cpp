@@ -166,7 +166,7 @@ int urg_unko::getData4URG(float dist,float old, float rad){
 void urg_unko::calcSurface2D()
 {
 	(void)time_stamp;
-
+	int count = 0;
 	long min_distance;
 	long max_distance;
 
@@ -212,10 +212,24 @@ void urg_unko::calcSurface2D()
 			ideal_x = +cos(this->radian + urgpos[3]) * x + sin(this->radian + urgpos[3]) * y;
 			ideal_y = -sin(this->radian + urgpos[3]) * x + cos(this->radian + urgpos[3]) * y;
 
-			if (ideal_y < 1000 && abs(ideal_x) < 100)
+			// 左センサの領域判別
+			if (urgpos[2] < 0)
 			{
-				shMem.setShMemData(true, EMARGENCY);
+				//if (ideal_x < 1000.0 && ideal_y < 150.0 && ideal_y > -150.0)
+				if (ideal_x < 1000.0)
+				{
+					count += 1;
+				}
 			}
+			// 右センサの領域判別
+			/*else if (urgpos[2] > 0)
+			{
+				if (ideal_x < 1000.0 && ideal_y < 150.0 && ideal_y > -150.0)
+			{
+					count += 1;
+			}
+			}*/
+			
 
 			//2次元平面の座標変換
 			//pointpos[0] = +cos(radian + urgpos[3]) * (x + distance - distance_old + urgpos[1]) + sin(radian + urgpos[3]) * (y + urgpos[2]) + currentCoord_x;
@@ -229,6 +243,12 @@ void urg_unko::calcSurface2D()
 
 			pointpos[2] = z;
 
+		}
+		//１スキャン分のpcdファイルを保存
+		//pcdSave();
+		if (count > 8){
+			shMem.setShMemData(true, EMARGENCY);
+			//printf("点の数　= %d\n", count);
 		}
 	}
 }
