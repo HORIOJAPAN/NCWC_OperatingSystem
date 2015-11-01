@@ -261,6 +261,7 @@ void DrivingFollowPath::sendDrivingCommand(Direction direction, int delay_int)
 	int mode = 1;
 
 	if (direction != STOP) nowDirection = direction;
+	waittime = delay_int;
 
 	switch (direction)
 	{
@@ -381,7 +382,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 		right = true;
 	}
 
-	if (left && right )
+	if (left && right)
 	{
 		cout << "非常停止してるかも" << endl;
 		DrivingControl::sendDrivingCommand(1, 0, 0, 0);
@@ -522,10 +523,10 @@ urg_driving::ObstacleEmergency urg_driving::checkObstacle()
 				count += 1;
 			}
 		}
-		if (count > 8){
-			return DETECT;
-			//printf("点の数　= %d\n", count);
-		}
-		return NONE;
 	}
+	if (count > 8){
+		return DETECT;
+		//printf("点の数　= %d\n", count);
+	}
+	return NONE;
 }
