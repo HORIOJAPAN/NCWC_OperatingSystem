@@ -187,7 +187,7 @@ void getDataUNKOOrigin(int URG_COM[], float URGPOS[][4], int ARDUINO_COM, int Nu
 
 	HANDLE handle_ARDUINO;	//Arduino用ハンドル
 
-	urg_unko *unkoArray = new urg_unko[NumOfURG];	//urg_unko型変数の配列
+	urg_mapping *unkoArray = new urg_mapping[NumOfURG];	//urg_unko型変数の配列
 
 	Timer	timer; //ループの間隔調整&インターバル測定用タイマー
 	int		interval;
@@ -232,7 +232,7 @@ void getDataUNKOOrigin(int URG_COM[], float URGPOS[][4], int ARDUINO_COM, int Nu
 	PCImage::isColor = true;
 	PCImage::BGR color[2] = { PCImage::B, PCImage::G };
 	
-	urg_unko::initPCImage(imgWidth,imgHeight,imgResolution);
+	urg_mapping::initPCImage(imgWidth,imgHeight,imgResolution);
 
 	//接続したURGの数だけurg_unko型オブジェクトを初期化
 	for (int i = 0; i < NumOfURG; i++)

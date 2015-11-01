@@ -81,6 +81,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mapping.cpp" />
     <ClCompile Include="pcimage.cpp" />
+    <ClCompile Include="urg_mapping.cpp" />
     <ClCompile Include="urg_unko.cpp" />
   </ItemGroup>
   <ItemGroup>
