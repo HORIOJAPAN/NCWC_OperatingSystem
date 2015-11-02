@@ -26,10 +26,10 @@ void getArduinoHandle(int arduinoCOM, HANDLE& hComm);
 //urg_unkoのmainループ
 void getDataUNKOOrigin(int URG_COM[], float URGPOS[][4], int ARDUINO_COM, int NumOfURG);
 
-class writePCD
+class writePCD:ofstream
 {
 private:
-	std::ofstream ofs;	//ファイルストリームオブジェクト．pcdファイル作成に用いる
+	//std::ofstream ofs;	//ファイルストリームオブジェクト．pcdファイル作成に用いる
 	static int pcdnum;			//pcdファイルの番号をカウントする変数
 	int pcdcount;		//pcdファイルに書き込む点の数をカウントする変数
 
@@ -91,7 +91,7 @@ protected:
 	float* pointpos[2];
 	int data_n;
 
-	writePCD pcd;
+	static writePCD pcd;
 
 	/***********************
 	 *	privateなメソッド  *
@@ -135,6 +135,8 @@ private:
 	static PCImage pcimage;	//マップ画像作成用クラス
 
 public:
+	~urg_mapping();
+
 	void setWriteLine(bool isLine);
 	std::string	getDirName();
 	void setPCDDir(std::string dirname = "");

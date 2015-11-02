@@ -62,8 +62,8 @@ void urg_unko::init(int COM, float pos[])
 int urg_unko::disconnectURG(){
 
 	//切断
-	free(data);
-	urg_close(&urg);
+	//free(data);
+	//urg_close(&urg);
 
 	printf("URG disconnected \n");
 	return 0;
@@ -229,6 +229,7 @@ void urg_unko::updateCurrentCoord(float coordXY[])
 	currentCoord_x = coordXY[0];
 	currentCoord_y = coordXY[1];
 }
+
 void urg_unko::savePCD()
 {
 	pcd.pcdinit();
@@ -249,6 +250,7 @@ void urg_unko::getData(float data[] , int data_n, int offset)
 		data[i] = this->data[i];
 	}
 }
+writePCD urg_unko::pcd;
 
 int writePCD::pcdnum = 0;
 
@@ -274,14 +276,15 @@ void writePCD::pcdinit()
 	if (!isWritePCD) return;
 
 	//ファイル名を指定してファイルストリームを開く
-	ofs.open("./" + dirname + "/pointcloud_" + std::to_string(pcdnum) + ".pcd",std::ios::out);
+	if(dirname != "") this->open("./" + dirname + "/pointcloud_" + std::to_string(pcdnum) + ".pcd",std::ios::out);
+	else this->open("./pointcloud_" + std::to_string(pcdnum) + ".pcd", std::ios::out);
 
 	//pcdファイル番号を進めてデータ数カウント用変数を初期化
 	pcdnum++;
 	pcdcount = 0;
 
 	//ヘッダを記入
-	ofs << "# .PCD v.7 - Point Cloud Data file format\n"
+	*this << "# .PCD v.7 - Point Cloud Data file format\n"
 		<< "VERSION .7\n"
 		<< "FIELDS x y z\n"
 		<< "SIZE 4 4 4\n"
@@ -308,7 +311,7 @@ void writePCD::pcdWrite(float x, float y)
 	if (!isWritePCD) return;
 
 	//データを書き込んでデータ数をカウント
-	ofs << x << " " << y << " " << "0.0" << endl;
+	*this << x << " " << y << " " << "0.0" << endl;
 	pcdcount++;
 }
 
@@ -317,7 +320,7 @@ void writePCD::pcdWrite(float x, float y, float pos_x, float pos_y, float droidA
 	if (!isWritePCD) return;
 
 	//データを書き込んでデータ数をカウント
-	ofs << x << ", " << y << ", " << pos_x << ", " << pos_y << ", " << droidAngle[0] << ", " << droidAngle[1] << ", " << droidAngle[2] << ", " << droidGPS[0] << ", " << droidGPS[1] << ", " << droidGPS[2] << ", " << endl;
+	*this << x << ", " << y << ", " << pos_x << ", " << pos_y << ", " << droidAngle[0] << ", " << droidAngle[1] << ", " << droidAngle[2] << ", " << droidGPS[0] << ", " << droidGPS[1] << ", " << droidGPS[2] << ", " << endl;
 	pcdcount++;
 }
 void writePCD::pcdWrite(float x, float y, float pos_x, float pos_y)
@@ -325,7 +328,7 @@ void writePCD::pcdWrite(float x, float y, float pos_x, float pos_y)
 	if (!isWritePCD) return;
 
 	//データを書き込んでデータ数をカウント
-	ofs << x << ", " << y << ", " << pos_x << ", " << pos_y << ", " << endl;
+	*this << x << ", " << y << ", " << pos_x << ", " << pos_y << ", " << endl;
 	pcdcount++;
 }
 /*
@@ -341,9 +344,9 @@ void writePCD::pcdSave()
 	if (!isWritePCD) return;
 
 	//最終的なデータ数を追記
-	ofs.seekp(0, ios_base::beg);
+	this->seekp(0, ios_base::beg);
 
-	ofs << "# .PCD v.7 - Point Cloud Data file format\n"
+	*this << "# .PCD v.7 - Point Cloud Data file format\n"
 		<< "VERSION .7\n"
 		<< "FIELDS x y z\n"
 		<< "SIZE 4 4 4\n"
@@ -356,8 +359,8 @@ void writePCD::pcdSave()
 		<< "DATA ascii" << endl;
 
 	//ファイルストリームを緘
-	ofs.close();
-	ofs.flush();
+	this->close();
+	this->flush();
 }
 void writePCD::setDirName(std::string dirname)
 {

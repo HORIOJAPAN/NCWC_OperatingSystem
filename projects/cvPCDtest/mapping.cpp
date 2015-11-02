@@ -219,9 +219,9 @@ void getDataUNKOOrigin(int URG_COM[], float URGPOS[][4], int ARDUINO_COM, int Nu
 
 	// 姿勢表示用矢印の読み込み
 	arrowpic = imread("../../res/img/arrow.jpg");
+	if (arrowpic.empty()) arrowpic = imread("../../../res/img/arrow.jpg");
 	if (arrowpic.empty()) cout << "No arrow image" << endl;
 	arrowpic = ~arrowpic;
-
 	//rcvDroid.getOrientationData(defaultOrientation);
 
 	//Arduinoとシリアル通信を行うためのハンドルを取得
@@ -257,10 +257,8 @@ void getDataUNKOOrigin(int URG_COM[], float URGPOS[][4], int ARDUINO_COM, int Nu
 		// 処理の間隔を指定時間あける
 		if (timer.getLapTime(1, Timer::millisec, false) < shMemInt.getShMemData(INTERVALTIME)) continue;
 		interval = timer.getLapTime();
-
 		//エンコーダから移動量，回転量を取得
 		Encoder(handle_ARDUINO, dist, rad);
-
 		//積算した距離を格納
 		chairdist = dist;
 
@@ -270,6 +268,7 @@ void getDataUNKOOrigin(int URG_COM[], float URGPOS[][4], int ARDUINO_COM, int Nu
 			unkoArray[i].updateCurrentCoord(currentCoord);
 			unkoArray[i].setPCImageColor(color[i]);
 			unkoArray[i].writeMap(dist,chairdist_old, rad);
+			unkoArray[i].savePCD();
 		}
 		
 		//現在の位置を更新
@@ -306,7 +305,7 @@ void getDataUNKOOrigin(int URG_COM[], float URGPOS[][4], int ARDUINO_COM, int Nu
 	}
 
 	//Newで確保した配列の解放
-	delete[] unkoArray;
+	//delete[] unkoArray;
 	// 表示している画像を閉じる
 	destroyAllWindows();
 	//Arduinoのハンドルを解放

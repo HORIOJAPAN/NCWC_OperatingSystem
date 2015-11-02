@@ -181,23 +181,28 @@ namespace csPCIform
 
                 // 以下プロセスの起動系
                 Process myProcess = new Process();
+
+                float urgLrad = float.Parse(urgLdegTxtbox.Text) / 180 * (float)Math.PI;
+                float urgRrad = float.Parse(urgRdegTxtbox.Text) / 180 * (float)Math.PI;
                 //引数
                 String args =
                     //URGRのCOM，URGLのCOM，ArduinoのCOM
                     urgRcomCbbox.Text.ToString().Substring(3) + " " + urgLcomCbbox.Text.ToString().Substring(3) + " " + arduinocomCbbox.Text.ToString().Substring(3) + " "
                     //URGRのパラメータ
                     + urgRheightTxtbox.Text.ToString() + " " + urgRXdistTxtbox.Text.ToString() + " "
-                    + urgRYdistTxtbox.Text.ToString() + " " + urgRdegTxtbox.Text.ToString() + " "
+                    + urgRYdistTxtbox.Text.ToString() + " " + urgRrad.ToString() + " "
                     //URGLのパラメータ
                     + urgLheightTxtbox.Text.ToString() + " " + urgLXdistTxtbox.Text.ToString() + " "
-                    + urgLYdistTxtbox.Text.ToString() + " " + urgLdegTxtbox.Text.ToString() + " "
+                    + urgLYdistTxtbox.Text.ToString() + " " + urgLrad.ToString() + " "
                     //画像の幅，高さ，解像度
                     + imgWidthTxtbox.Text.ToString() + " " + imgHeightTxtbox.Text.ToString() + " " + imgResolutionTxtbox.Text.ToString();
 
                 myProcess.StartInfo.FileName = "../../../Debug\\Mapping.exe";
                 myProcess.StartInfo.Arguments = args;
                 myProcess.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+
                 myProcess.Start();
+               
 
                 isRunning = true;
                 startBtn.Text = "Stop";

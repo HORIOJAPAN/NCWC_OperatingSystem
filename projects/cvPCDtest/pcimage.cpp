@@ -59,7 +59,7 @@ void PCImage::initPCImage(int width, int height, int resolution)
 	//prepareArrow();
 
 	//年月日時分秒で命名したディレクトリを作成
-	if (dirname != ""){
+	if (dirname == ""){
 		getNowTime(dirname);
 		if (_mkdir(dirname.c_str()) == 0){
 			cout << "Made a directory named:" << dirname << endl << endl;

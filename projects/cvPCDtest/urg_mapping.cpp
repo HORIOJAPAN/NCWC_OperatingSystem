@@ -5,6 +5,10 @@ using namespace std;
 PCImage urg_mapping::pcimage;
 
 
+urg_mapping::~urg_mapping()
+{
+
+}
 void urg_mapping::setWriteLine(bool isLine)
 {
 	pcimage.isWriteLine = isLine;
