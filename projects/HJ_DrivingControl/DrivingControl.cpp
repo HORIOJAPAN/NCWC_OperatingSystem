@@ -362,7 +362,6 @@ void DrivingFollowPath::restart(int time , Timer& timer )
 {
 	if(nowDirection != STOP) sendDrivingCommand(nowDirection, waittime - time);
 	else sendDrivingCommand(preDirection, waittime - time);
-	//Sleep(1000);
 	timer.getLapTime();
 }
 
@@ -401,16 +400,9 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 		if(nowDirection != STOP) sendDrivingCommand(STOP);
 		//if (MessageBoxA(NULL, "動いてもいい？？", "もしかしてなんか危ない？？", MB_YESNO | MB_ICONSTOP) == IDYES)  restart(time, timer);
 
-		isObstacle = true;
-
 		while (urgdArray[0].checkObstacle() || urgdArray[1].checkObstacle());
 		restart(time, timer);
 	}
-	/*else if (isObstacle)
-	{
-		isObstacle = false;
-		restart(time, timer);
-	}*/
 }
 
 void DrivingFollowPath::waitDriveComplete_FF()

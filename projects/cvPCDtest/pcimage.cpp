@@ -21,7 +21,10 @@ bool PCImage::isColor = true;
 *	int height　横
 *	int resolution　1pix何cm四方にするか
 */
-PCImage::PCImage() : pcimage(imageNum, *this){}
+PCImage::PCImage() : pcimage(imageNum, *this)
+{
+	dirname = "";
+}
 
 //デストラクタ
 //解放されていない画像領域があれば保存しておく
@@ -49,16 +52,21 @@ void PCImage::initPCImage(int width, int height, int resolution)
 	limit = 10;
 	limitpix = limit * coefficient;
 
+	origin_x = limitpix;
+	origin_y = img_height / 2;
+
 	for (int i = 0; i < sizeof(color); i++) color[i] = false;
 	//prepareArrow();
 
 	//年月日時分秒で命名したディレクトリを作成
-	getNowTime(dirname);
-	if (_mkdir(dirname.c_str()) == 0){
-		cout << "Made a directory named:" << dirname << endl << endl;
-	}
-	else{
-		cout << "Failed to make the directory" << endl;
+	if (dirname != ""){
+		getNowTime(dirname);
+		if (_mkdir(dirname.c_str()) == 0){
+			cout << "Made a directory named:" << dirname << endl << endl;
+		}
+		else{
+			cout << "Failed to make the directory" << endl;
+		}
 	}
 
 	//pcimage[0]を準備する
@@ -85,7 +93,11 @@ PCImage PCImage::instantiate()
 {
 	return *this;
 }
-
+void PCImage::setOrigin(int x, int y)
+{
+	origin_x = x;
+	origin_y = y;
+}
 
 void PCImage::prepareArrow()
 {
@@ -133,8 +145,8 @@ void PCImage::showNowPoint(float x_val, float y_val)
 	pcimage[nowimage].getImageNumber(XY);		//中心画像のX,Y番号を取得
 
 	// 座標を画像内に合わせる
-	xi = xi - XY[0] * img_width + limitpix;
-	yi = yi - XY[1] * img_height + img_height / 2;
+	xi = xi - XY[0] * img_width + origin_x;
+	yi = yi - XY[1] * img_height + origin_y;
 
 	circle(showpic, cv::Point(xi, yi), 10, cv::Scalar(0, 0, 255), 3);
 
@@ -173,13 +185,13 @@ void PCImage::writeLine(float x_val, float y_val, float pos_x, float pos_y)
 	//x,yの値を指定した解像度に合わせる
 	x_val *= coefficient;
 	y_val *= coefficient;
-	x_val = (int)x_val - XY[0] * img_width + limitpix;
-	y_val = (int)y_val - XY[1] * img_height + img_height / 2;
+	x_val = (int)x_val - XY[0] * img_width + origin_x;
+	y_val = (int)y_val - XY[1] * img_height + origin_y;
 
 	pos_x *= coefficient;
 	pos_y *= coefficient;
-	pos_x = (int)pos_x - XY[0] * img_width + limitpix;
-	pos_y = (int)pos_y - XY[1] * img_height + img_height / 2;
+	pos_x = (int)pos_x - XY[0] * img_width + origin_x;
+	pos_y = (int)pos_y - XY[1] * img_height + origin_y;
 
 	//取得した[x,y]と現在地を線で結ぶ
 	pcimage[nowimage].line(Point(x_val, y_val), Point(pos_x, pos_y), 100);
@@ -244,6 +256,10 @@ void PCImage::savePCImage()
 {
 	pcimage[nowimage].release();
 }
+void PCImage::savePCImage(int num, string savename)
+{
+	pcimage[num].savePCImage(savename);
+}
 
 std::string PCImage::getDirname()
 {
@@ -287,8 +303,8 @@ int PCImage::checkPosition(float pos_x, float pos_y)
 	pcimage[nowimage].getImageNumber(XY);		//中心画像のX,Y番号を取得
 
 	// 座標を画像内に合わせる
-	xi = xi - XY[0] * img_width + limitpix;
-	yi = yi - XY[1] * img_height + img_height / 2;
+	xi = xi - XY[0] * img_width + origin_x;
+	yi = yi - XY[1] * img_height + origin_y;
 
 	cout << "Position:" << xi << "," << yi << endl;
 
@@ -597,8 +613,8 @@ int PCImage::PCI::writePoint(float x_val, float y_val)
 	y_val *= pciOut.coefficient;
 
 	//x,yの値を画像の位置に合わせる
-	x_val = x_val - imageNumXY[0] * pciOut.img_width + pciOut.limitpix;
-	y_val = y_val - imageNumXY[1] * pciOut.img_height + rows / 2;
+	x_val = x_val - imageNumXY[0] * pciOut.img_width + pciOut.origin_x;
+	y_val = y_val - imageNumXY[1] * pciOut.img_height + pciOut.origin_y;
 
 	//当画像領域内の点か確認して当画像領域外の場合は該当領域のIDを返す
 	int x_coord = 0;
@@ -631,6 +647,10 @@ int PCImage::PCI::writePoint(float x_val, float y_val)
 void PCImage::PCI::savePCImage()
 {
 	imwrite(name, *this);
+}
+void PCImage::PCI::savePCImage(string savename)
+{
+	imwrite(savename + ".jpg", *this);
 }
 void PCImage::PCI::release()
 {

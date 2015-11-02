@@ -44,6 +44,7 @@ public:
 	enum ObstacleEmergency { NONE, DETECT };
 
 	ObstacleEmergency checkObstacle();
+
 };
 
 class DrivingFollowPath

@@ -35,6 +35,8 @@ private:
 	int imgval_increment;			//画素値の増加量
 	int limit , limitpix;			//次の画像を読み込むボーダーライン(m)(pix)
 
+	int origin_x, origin_y;
+
 	int nowimage;							//現在走行している画像の番号
 	float selfPos_x, selfPos_y;			// 自己位置
 
@@ -108,6 +110,7 @@ public:
 	//画像を保存して領域を解放する
 	void savePCImage(int x, int y);
 	void savePCImage();
+	void savePCImage(int num, std::string savename);
 
 	// 保存したディレクトリ名を取得
 	std::string getDirname();
@@ -116,6 +119,8 @@ public:
 	static void getNowTime(std::string& nowstr);
 
 	void setColor(BGR bgr);
+
+	void setOrigin(int x,int y);
 	
 };
 
@@ -158,6 +163,7 @@ public:
 	void release();
 	//画像を保存する
 	void savePCImage();
+	void savePCImage(std::string savename);
 
 	// 直線を描画する．画素値が0でない画素は上書きしない
 	void line(cv::Point start, cv::Point end, int color);
