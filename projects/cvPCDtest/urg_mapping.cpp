@@ -41,3 +41,7 @@ void urg_mapping::writeMap(float dist, float old, float rad)
 			pcimage.writePoint(pointpos[0][i] / 1000, pointpos[1][i] / 1000, currentCoord_x / 1000, currentCoord_y / 1000);
 	}
 }
+void urg_mapping::setOrigin(int x, int y)
+{
+	pcimage.setOrigin(x, y);
+}

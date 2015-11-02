@@ -140,6 +140,8 @@ public:
 	static void initPCImage(int width, int height, int resolution);
 	void setPCImageColor(PCImage::BGR bgr);
 
+	static void setOrigin(int x,int y);
+
 	void writeMap(float dist, float old, float rad);
 };
 
