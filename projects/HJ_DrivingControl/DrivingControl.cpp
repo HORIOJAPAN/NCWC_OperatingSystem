@@ -498,22 +498,22 @@ urg_driving::ObstacleEmergency urg_driving::checkObstacle()
 		y = (float)(l * sin(radian));
 		z = urgpos[0];
 
-		ideal_x = (float)(l * cos(radian - (double)urgpos[3]));
-		ideal_y = (float)(l * sin(radian - (double)urgpos[3]));
+		ideal_x = (float)(l * cos(radian + (double)urgpos[3]));
+		ideal_y = (float)(l * sin(radian + (double)urgpos[3]));
 
-		// 左センサの領域判別
+		// 右センサの領域判別
 		if (urgpos[2] < 0)
 		{
-			if (ideal_x < 1000.0 && ideal_y < 50.0 && ideal_y > -20.0)
-				//if (ideal_x < 1000.0)
+			if (ideal_x < 1000.0 && ideal_y < 200.0 && ideal_y > -500.0)
+			//if (ideal_x < 500.0)
 			{
 				count += 1;
 			}
 		}
-		// 右センサの領域判別
+		// 左センサの領域判別
 		else if (urgpos[2] > 0)
 		{
-			if (ideal_x < 1000.0 && ideal_y < 20.0 && ideal_y > -50.0)
+			if (ideal_x < 1000.0 && ideal_y < 500.0 && ideal_y > -200.0)
 			{
 				count += 1;
 			}
