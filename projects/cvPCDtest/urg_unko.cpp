@@ -239,7 +239,17 @@ void urg_unko::savePCD()
 	}
 	pcd.pcdSave();
 }
-
+int urg_unko::getData_n()
+{
+	return data_n;
+}
+void urg_unko::getData(float data[] , int data_n, int offset)
+{
+	for (int i = offset; i < data_n; i++)
+	{
+		data[i] = this->data[i];
+	}
+}
 
 int writePCD::pcdnum = 0;
 
