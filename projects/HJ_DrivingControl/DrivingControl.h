@@ -38,17 +38,33 @@ public:
 class urg_driving
 	: public urg_mapping
 {
-private:
-    
 public:
 	enum ObstacleEmergency { NONE, DETECT };
-
 	ObstacleEmergency checkObstacle();
+	void getObstacleData(float* data_x , float* data_y);
+};
+class Manage2URG_Drive
+{
+private:
+	urg_driving* urgdArray;
+	cv::Mat tmTemplate;
+public:
+	~Manage2URG_Drive();
 
+	void setURGParam(int URG_COM[], float URGPOS[][4], int NumOfURG);
+	
+    urg_driving::ObstacleEmergency checkObstacle();
+
+	void getAroundImage(int width = 100 , int height = 100 , int resolution = 5 ,int measurementTimes = 10);
+
+	/********************************************
+    // ここで自己位置推定の処理を行うかな？
+    *********************************************/
+	void tMatching();
 };
 
 class DrivingFollowPath
-	: DrivingControl
+	: public DrivingControl
 {
 private:
 	// 経路データ読み取り用変数
@@ -100,9 +116,8 @@ private:
 
 	void checkEmergencyStop(Timer& timer);
 	void restart(int time, Timer& timer);
-	bool isObstacle = false;
 
-	urg_driving* urgdArray;
+	Manage2URG_Drive mUrgd;
 
 public:
 	// もろもろの初期化処理

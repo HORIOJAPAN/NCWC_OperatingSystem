@@ -395,12 +395,12 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
                 restart(time, timer);
 		}
 	}
-	if (urgdArray[0].checkObstacle() || urgdArray[1].checkObstacle())
+	if (mUrgd.checkObstacle())
 	{
 		if(nowDirection != STOP) sendDrivingCommand(STOP);
 		//if (MessageBoxA(NULL, "動いてもいい？？", "もしかしてなんか危ない？？", MB_YESNO | MB_ICONSTOP) == IDYES)  restart(time, timer);
 
-		while (urgdArray[0].checkObstacle() || urgdArray[1].checkObstacle());
+		while (mUrgd.checkObstacle());
 		restart(time, timer);
 	}
 }
@@ -428,6 +428,8 @@ void DrivingFollowPath::run_FF()
 	getEncoderCount();
 
 	char z = getchar();
+
+	mUrgd.getAroundImage();
 
 	while (getNextPoint())
 	{
@@ -470,11 +472,52 @@ void DrivingFollowPath::run()
 
 void DrivingFollowPath::setURGParam(int URG_COM[], float URGPOS[][4], int NumOfURG)
 {
+	mUrgd.setURGParam(URG_COM, URGPOS, NumOfURG);
+}
+void Manage2URG_Drive::setURGParam(int URG_COM[], float URGPOS[][4], int NumOfURG)
+{
 	urgdArray = new urg_driving[NumOfURG];
 	for (int i = 0; i < NumOfURG; i++)
 	{
 		urgdArray[i].init(URG_COM[i], URGPOS[i]);
 	}
+}
+Manage2URG_Drive::~Manage2URG_Drive()
+{
+	delete[] urgdArray;
+}
+urg_driving::ObstacleEmergency Manage2URG_Drive::checkObstacle()
+{
+	
+	float* dataL[2] , *dataR[2];
+
+	urgdArray[0].getObstacleData(dataR[0], dataR[1]);
+	urgdArray[1].getObstacleData(dataL[0], dataL[1]);
+
+
+    // ここに条件式ね
+
+
+	for (int i = 0; i < 2; i++) delete dataL[i];
+	for (int i = 0; i < 2; i++) delete dataR[i];
+
+	return urg_driving::ObstacleEmergency::NONE;
+
+}
+void Manage2URG_Drive::getAroundImage(int width, int height, int resolution,int measurementTimes)
+{
+	urg_driving::initPCImage(width, height, resolution);
+	urg_driving::setPCImageOrigin(width / 2, height / 2);
+	for (int times = 0; times < measurementTimes; times++)
+	{
+		for (int i = 0; i < 2; i++)
+		{
+			urgdArray[i].writeMap(0, 0, 0);
+		}
+	}
+	urg_driving::getPCImage(tmTemplate);
+	cv::imshow("show", tmTemplate);
+	cv::waitKey(0);
 }
 
 urg_driving::ObstacleEmergency urg_driving::checkObstacle()
@@ -524,4 +567,57 @@ urg_driving::ObstacleEmergency urg_driving::checkObstacle()
 		//printf("点の数　= %d\n", count);
 	}
 	return NONE;
+}
+void urg_driving::getObstacleData(float* data_x, float* data_y)
+{
+	this->urg_unko::getData4URG(0, 0, 0);
+
+	data_x = new float[data_n];
+	data_y = new float[data_n];
+	int datacount = 1;
+
+	for (int i = 0; i < data_n; ++i) {
+		long l = data[i];	//取得した点までの距離
+		double radian;
+		float x, y, z;
+		float ideal_x, ideal_y;
+
+		//異常値ならとばす
+		if (!this->pointpos[0][i] && !this->pointpos[1][i])	continue;
+
+		//点までの角度を取得してxyに変換
+		//(極座標で取得されるデータをデカルト座標に変換)
+		radian = urg_index2rad(&urg, i);
+		x = (float)(l * cos(radian));
+		y = (float)(l * sin(radian));
+		z = urgpos[0];
+
+		ideal_x = (float)(l * cos(radian + (double)urgpos[3]));
+		ideal_y = (float)(l * sin(radian + (double)urgpos[3]));
+
+		// 右センサの領域判別
+		if (urgpos[2] < 0)
+		{
+			if (ideal_x < 1000.0 && ideal_y < 200.0 && ideal_y > -500.0)
+				//if (ideal_x < 500.0)
+			{
+				data_x[datacount] = ideal_x;
+				data_y[datacount] = ideal_y;
+				datacount++;
+			}
+		}
+		// 左センサの領域判別
+		else if (urgpos[2] > 0)
+		{
+			if (ideal_x < 1000.0 && ideal_y < 500.0 && ideal_y > -200.0)
+			{
+				data_x[datacount] = ideal_x;
+				data_y[datacount] = ideal_y;
+				datacount++;
+			}
+		}
+	}
+
+	data_x[0] = datacount-1;
+	data_y[0] = datacount-1;
 }

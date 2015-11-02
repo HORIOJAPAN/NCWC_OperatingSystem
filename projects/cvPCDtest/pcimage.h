@@ -121,6 +121,7 @@ public:
 	void setColor(BGR bgr);
 
 	void setOrigin(int x,int y);
+	void getImage(cv::Mat& m , int num = -1);
 	
 };
 

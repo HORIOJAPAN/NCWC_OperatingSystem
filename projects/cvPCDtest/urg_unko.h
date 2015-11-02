@@ -123,6 +123,8 @@ public:
 	void updateCurrentCoord(float coord_x, float coord_y);
 	void updateCurrentCoord(float coordXY[]);
 
+	int getData_n();
+	void getData(float data[], int data_n, int offset = 0);
 };
 
 class urg_mapping : 
@@ -138,8 +140,11 @@ public:
 
 	static void initPCImage(PCImage& pci);
 	static void initPCImage(int width, int height, int resolution);
-	void setPCImageColor(PCImage::BGR bgr);
+	static void setPCImageOrigin(int x, int y);
+	static void getPCImage(cv::Mat& m, int num = -1);
 
+	void setPCImageColor(PCImage::BGR bgr);
+	
 	void writeMap(float dist, float old, float rad);
 };
 

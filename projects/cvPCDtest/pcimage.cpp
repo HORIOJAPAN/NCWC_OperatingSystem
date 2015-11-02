@@ -98,6 +98,11 @@ void PCImage::setOrigin(int x, int y)
 	origin_x = x;
 	origin_y = y;
 }
+void PCImage::getImage(cv::Mat& m, int num )
+{
+	if (num == -1) num = nowimage;
+	m = pcimage[num].clone();
+}
 
 void PCImage::prepareArrow()
 {
