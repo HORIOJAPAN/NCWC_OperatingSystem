@@ -27,8 +27,9 @@ int main(int argc, char* argv[])
 		cout << argv[i] << endl;
 	}
 	
-
-	if (argc == 11)
+	// コマンドライン引数からパラメータを受け取る
+	// URGは右のパラメータから受け取る
+	if (argc == 15)
 	{
 		//URGのCOMポートを指定
 		URG_COM[0] = atoi(argv[1]);
@@ -37,15 +38,12 @@ int main(int argc, char* argv[])
 		ARDUINO_COM = atoi(argv[3]);
 
 		//URGの位置を指定
-		urgPOS[0][0] = atof(argv[4]);
-		urgPOS[0][1] = atof(argv[5]);
-		urgPOS[1][0] = atof(argv[6]);
-		urgPOS[1][1] = atof(argv[7]);
-
+		for (int i = 0; i < 4; i++) urgPOS[0][i] = atof(argv[i + 4]);
+		for (int i = 0; i < 4; i++) urgPOS[1][i] = atof(argv[i + 8]);
 		//pcimageの引数
-		imgWidth = atoi(argv[8]);
-		imgHeight = atoi(argv[9]);
-		imgResolution = atoi(argv[10]);
+		imgWidth = atoi(argv[12]);
+		imgHeight = atoi(argv[13]);
+		imgResolution = atoi(argv[14]);
 
 		cout << "csFormから起動" << endl;
 	}

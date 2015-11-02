@@ -39,6 +39,7 @@ public:
 	bool isWritePCD;
 
 	writePCD(std::string dirName = "");
+	~writePCD();
 	//pcdファイルを作成して書き込む準備を行う
 	void pcdinit();
 	//pcdファイルへ点を書き込む

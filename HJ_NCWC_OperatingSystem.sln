@@ -25,6 +25,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Timer", "projects\Timer\Tim
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MappingForm", "projects\MappingForm\MappingForm.csproj", "{65732A06-615E-4065-BB4F-0E752F99D8D4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrivingControlForm", "DrivingControlForm\DrivingControlForm.csproj", "{0348DB08-AB61-43AE-A41B-A5EA6C786BAA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -151,6 +153,16 @@ Global
 		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Release|Win32.ActiveCfg = Debug|Any CPU
 		{65732A06-615E-4065-BB4F-0E752F99D8D4}.Release|Win32.Build.0 = Debug|Any CPU
+		{0348DB08-AB61-43AE-A41B-A5EA6C786BAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0348DB08-AB61-43AE-A41B-A5EA6C786BAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0348DB08-AB61-43AE-A41B-A5EA6C786BAA}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{0348DB08-AB61-43AE-A41B-A5EA6C786BAA}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{0348DB08-AB61-43AE-A41B-A5EA6C786BAA}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{0348DB08-AB61-43AE-A41B-A5EA6C786BAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0348DB08-AB61-43AE-A41B-A5EA6C786BAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0348DB08-AB61-43AE-A41B-A5EA6C786BAA}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{0348DB08-AB61-43AE-A41B-A5EA6C786BAA}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{0348DB08-AB61-43AE-A41B-A5EA6C786BAA}.Release|Win32.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

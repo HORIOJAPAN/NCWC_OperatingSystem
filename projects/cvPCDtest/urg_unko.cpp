@@ -257,6 +257,9 @@ writePCD::writePCD(std::string dirName)
 	isWritePCD = true;
 	this->dirname = dirName;
 }
+writePCD::~writePCD()
+{
+}
 
 /*
 *	ŠT—v:

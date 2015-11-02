@@ -23,7 +23,7 @@ namespace csPCIform
 
         // int型の共有メモリを扱うクラス
         // { 終了合図用, }
-        private SharedMemoryInt shMemInt;           
+        private SharedMemoryInt shMemInt;
 
         // コンストラクタ
         public MappingForm()
@@ -95,22 +95,22 @@ namespace csPCIform
             //! 利用可能なシリアルポート名の配列を取得する.
             string[] PortList = SerialPort.GetPortNames();
 
-            urg1comCbbox.Items.Clear();
-            urg2comCbbox.Items.Clear();
+            urgLcomCbbox.Items.Clear();
+            urgRcomCbbox.Items.Clear();
             arduinocomCbbox.Items.Clear();
 
             //! シリアルポート名をコンボボックスにセットする.
             foreach (string PortName in PortList)
             {
-                urg1comCbbox.Items.Add(PortName);
-                urg2comCbbox.Items.Add(PortName);
+                urgLcomCbbox.Items.Add(PortName);
+                urgRcomCbbox.Items.Add(PortName);
                 arduinocomCbbox.Items.Add(PortName);
             }
-            if (urg1comCbbox.Items.Count > 0)
+            if (urgLcomCbbox.Items.Count > 0)
             {
-                urg1comCbbox.SelectedIndex = 0;
-                urg2comCbbox.SelectedIndex = 0;
-                arduinocomCbbox.SelectedIndex = 0;
+                urgRcomCbbox.SelectedText = "COM6";
+                urgLcomCbbox.SelectedText = "COM27";
+                arduinocomCbbox.SelectedText = "COM10";
             }
         }
 
@@ -176,19 +176,21 @@ namespace csPCIform
             if (!isRunning)
             {
                 // 終了の合図用メモリを初期化しておく
-                shMemInt.setShMemData(0);
+                shMemInt.setShMemData(0 , 0);
                 shMemInt.setShMemData(int.Parse(intervalTxtbox.Text.ToString()), 1);
 
                 // 以下プロセスの起動系
                 Process myProcess = new Process();
                 //引数
                 String args =
-                    //URG1のCOM，URG2のCOM，ArduinoのCOM
-                    urg1comCbbox.Text.ToString().Substring(3) + " " + urg2comCbbox.Text.ToString().Substring(3) + " " + arduinocomCbbox.Text.ToString().Substring(3) + " "
-                    //URG1の高さと距離
-                    + urg1heightTxtbox.Text.ToString() + " " + urg1distanceTxtbox.Text.ToString() + " "
-                    //URG2の高さと距離
-                    + urg2heightTxtbox.Text.ToString() + " " + urg2distanceTxtbox.Text.ToString() + " "
+                    //URGRのCOM，URGLのCOM，ArduinoのCOM
+                    urgRcomCbbox.Text.ToString().Substring(3) + " " + urgLcomCbbox.Text.ToString().Substring(3) + " " + arduinocomCbbox.Text.ToString().Substring(3) + " "
+                    //URGRのパラメータ
+                    + urgRheightTxtbox.Text.ToString() + " " + urgRXdistTxtbox.Text.ToString() + " "
+                    + urgRYdistTxtbox.Text.ToString() + " " + urgRdegTxtbox.Text.ToString() + " "
+                    //URGLのパラメータ
+                    + urgLheightTxtbox.Text.ToString() + " " + urgLXdistTxtbox.Text.ToString() + " "
+                    + urgLYdistTxtbox.Text.ToString() + " " + urgLdegTxtbox.Text.ToString() + " "
                     //画像の幅，高さ，解像度
                     + imgWidthTxtbox.Text.ToString() + " " + imgHeightTxtbox.Text.ToString() + " " + imgResolutionTxtbox.Text.ToString();
 
@@ -216,13 +218,21 @@ namespace csPCIform
         private void replaceBtn_Click(object sender, EventArgs e)
         {
             String tmp;
-            tmp = urg1heightTxtbox.Text.ToString();
-            urg1heightTxtbox.Text = urg2heightTxtbox.Text;
-            urg2heightTxtbox.Text = tmp;
+            tmp = urgLheightTxtbox.Text.ToString();
+            urgLheightTxtbox.Text = urgRheightTxtbox.Text;
+            urgRheightTxtbox.Text = tmp;
 
-            tmp = urg1distanceTxtbox.Text.ToString();
-            urg1distanceTxtbox.Text = urg2distanceTxtbox.Text;
-            urg2distanceTxtbox.Text = tmp;
+            tmp = urgLXdistTxtbox.Text.ToString();
+            urgLXdistTxtbox.Text = urgRXdistTxtbox.Text;
+            urgRXdistTxtbox.Text = tmp;
+
+            tmp = urgLYdistTxtbox.Text.ToString();
+            urgLYdistTxtbox.Text = urgRYdistTxtbox.Text;
+            urgRYdistTxtbox.Text = tmp;
+
+            tmp = urgLdegTxtbox.Text.ToString();
+            urgLdegTxtbox.Text = urgRdegTxtbox.Text;
+            urgRdegTxtbox.Text = tmp;
 
         }
         
