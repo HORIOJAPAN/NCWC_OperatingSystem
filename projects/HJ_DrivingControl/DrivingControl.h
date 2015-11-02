@@ -41,7 +41,7 @@ class urg_driving
 public:
 	enum ObstacleEmergency { NONE, DETECT };
 	ObstacleEmergency checkObstacle();
-	void getObstacleData(float* data_x , float* data_y);
+	void getObstacleData(float*& data_x , float*& data_y);
 };
 class Manage2URG_Drive
 {
@@ -55,7 +55,7 @@ public:
 	
     urg_driving::ObstacleEmergency checkObstacle();
 
-	void getAroundImage(int width = 100 , int height = 100 , int resolution = 5 ,int measurementTimes = 10);
+	void getAroundImage(int width = 300 , int height = 300 , int resolution = 5 ,int measurementTimes = 10);
 
 	/********************************************
     // ‚±‚±‚Å©ŒÈˆÊ’u„’è‚Ìˆ—‚ğs‚¤‚©‚ÈH

@@ -125,8 +125,8 @@ int urg_unko::getData4URG(float dist,float old, float rad){
 #if 1
 	//ƒf[ƒ^‚ÌŽæ“¾”ÍˆÍ‚ð•ÏX‚·‚éê‡
 	urg_set_scanning_parameter(&urg,
-		urg_deg2step(&urg, -90),
-		urg_deg2step(&urg, +90), 0);
+		urg_deg2step(&urg, -105),
+		urg_deg2step(&urg, +105), 0);
 #endif
 
 	//ÏŽZ‚µ‚½‹——£,‰ñ“]Šp‚ðŠi”[
@@ -198,7 +198,6 @@ void urg_unko::calcSurface2D()
 				this->pointpos[0][i] = 0;
 				this->pointpos[1][i] = 0;
 				continue;
-				l = max_distance;
 			}
 
 			//“_‚Ü‚Å‚ÌŠp“x‚ðŽæ“¾‚µ‚Äxy‚É•ÏŠ·
