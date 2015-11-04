@@ -117,11 +117,12 @@ private:
 	void waitDriveComplete_FF();
 
 	int waittime;
+	int overdelayCount;
 	Direction preDirection;
 	Direction nowDirection;
 
 	void checkEmergencyStop(Timer& timer);
-	void restart(int time, Timer& timer);
+	void restart(int time, Timer& timer,int encoderLRtmp[]);
 
 	Manage2URG_Drive mUrgd;
 

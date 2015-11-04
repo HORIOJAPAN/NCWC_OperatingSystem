@@ -133,7 +133,21 @@ void DrivingFollowPath::sendDrivingCommand(Direction direction, int delay_int)
 
 	preDirection = nowDirection;
 	nowDirection = direction;
-	if (delay_int != 99999 ) waittime = delay_int;
+
+	// delay_intは99999以上を指定できないので
+	if (delay_int > 99999)
+	{
+		overdelayCount = delay_int / 90000;
+		delay_int = delay_int % 90000;
+	}
+	else if (overdelayCount)
+	{
+		delay_int = 90000;
+		overdelayCount--;
+	}
+
+	// STOPの時は待機時間を保存しない
+	if (direction != STOP) waittime = delay_int;
 
 	switch (direction)
 	{
@@ -227,8 +241,17 @@ void DrivingFollowPath::waitDriveComplete()
 	sendDrivingCommand(STOP);
 }
 // 緊急停止後の駆動再開指令
-void DrivingFollowPath::restart(int time, Timer& timer)
+void DrivingFollowPath::restart(int time, Timer& timer, int encoderLRtmp[])
 {
+	// エンコーダの値が停止前から変化していたら．．．とりあえず変化してなかったことにする
+	//getEncoderCount();
+	//int dLeft = leftCount - encoderLRtmp[0];
+	//int dRight = rightCount - encoderLRtmp[1];
+	//aimCount_L += dLeft;
+	//aimCount_R += dRight;
+	leftCount = encoderLRtmp[0];
+	rightCount = encoderLRtmp[1];
+
 	if (nowDirection != STOP) sendDrivingCommand(nowDirection, waittime - time);
 	else sendDrivingCommand(preDirection, waittime - time);
 	timer.getLapTime();
@@ -238,6 +261,8 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 {
 	bool left = false;
 	bool right = false;
+
+	int encoderLRtmp[2] = { leftCount, rightCount };
 
 	int time = timer.getLapTime(1, Timer::millisec, false) - 1000;
 	if (time < 0) time = 0;
@@ -261,7 +286,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 		DrivingControl::sendDrivingCommand(1, 0, 0, 0);
 		if (retLastRead){
 			if (MessageBoxA(NULL, "もしかして非常停止してる？？\n動いてもいい？？", "もしかして！", MB_YESNO | MB_ICONSTOP) == IDYES)
-				restart(time, timer);
+				restart(time, timer,encoderLRtmp);
 		}
 	}
 	if (mUrgd.checkObstacle())
@@ -269,7 +294,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 		if (nowDirection != STOP) sendDrivingCommand(STOP);
 
 		while (mUrgd.checkObstacle());
-		restart(time, timer);
+		restart(time, timer, encoderLRtmp);
 	}
 }
 // 移動完了まで待機する
@@ -288,8 +313,6 @@ void DrivingFollowPath::waitDriveComplete_FF()
 
 	leftCount = 0;
 	rightCount = 0;
-
-	Sleep(500);
 }
 
 // FFで駆動を開始する
@@ -301,19 +324,31 @@ void DrivingFollowPath::run_FF()
 
 	//mUrgd.getAroundImage();
 
+	do{
+		sendDrivingCommand(FORWARD, 120000);
+		waitDriveComplete_FF();
+	} while (overdelayCount);
+	Sleep(500);
+
 	while (getNextPoint())
 	{
 		cout << "回転" << endl;
 		calcRotationAngle();
-		if (aimCount_L > 0) sendDrivingCommand_count(RIGHT, aimCount_L);
-		else sendDrivingCommand_count(LEFT, aimCount_L);
-		//waitDriveComplete_FF();
+		do{
+			if (aimCount_L > 0) sendDrivingCommand_count(RIGHT, aimCount_L);
+			else sendDrivingCommand_count(LEFT, aimCount_L);
+			waitDriveComplete_FF();
+		} while (overdelayCount);
+		Sleep(500);
 
 		cout << "直進" << endl;
 		calcMovingDistance();
-		if (aimCount_L > 0) sendDrivingCommand_count(FORWARD, aimCount_L);
-		else sendDrivingCommand_count(BACKWARD, aimCount_L);
-		//waitDriveComplete_FF();
+		do{
+			if (aimCount_L > 0) sendDrivingCommand_count(FORWARD, aimCount_L);
+			else sendDrivingCommand_count(BACKWARD, aimCount_L);
+			waitDriveComplete_FF();
+		} while (overdelayCount);
+		Sleep(500);
 	}
 }
 // FBで駆動を開始する(過去の遺産)
