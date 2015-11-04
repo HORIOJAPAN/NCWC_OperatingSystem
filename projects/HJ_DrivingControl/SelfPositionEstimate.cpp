@@ -8,7 +8,8 @@ int sp_angle;
 
 
 void Hyoka1(float tilt, float dist, float matchRatio, float& score){
-	score = (matchRatio * 100 - dist / 5 * (cos(tilt * 3.1415926 / 360) + 1));
+	score = matchRatio * 100;
+	//score = (matchRatio * 100 - dist / 5 * (cos(tilt * 3.1415926 / 360) + 1));
 }
 
 void MatchingEvaluation(
@@ -76,10 +77,10 @@ void MatchingEvaluation(
 	angle_center = sp_angle;
 }
 
-# define fieldSquareSize 350		// トリミング後、フィールド画像の縦横フル長さ
+# define fieldSquareSize 500		// トリミング後、フィールド画像の縦横フル長さ
 # define matchSquareSize 200		// トリミング後、マッチ画像の縦横フル長さ
 
-# define kakudoHaba1 24		// 1回目角度幅（片方向）
+# define kakudoHaba1 36		// 1回目角度幅（片方向）
 # define kakudoHaba2 5		// 2回目
 
 # define kizamiKakudo1 3	// 1回目刻み角度
@@ -92,11 +93,16 @@ void spEstimate(int ideal_x, int ideal_y, float ideal_angle, Mat img1, Mat img2)
 	// Mat img1 = imread(imageName);
 	// Mat img2 = imread("./img/a001.jpg");
 
+	const int leftBorder = ideal_x - (fieldSquareSize ) / 2;
+	const int upBorder = ideal_y - (fieldSquareSize ) / 2;
+	const int rightBorder = ideal_x + (fieldSquareSize) / 2;
+	const int downBorder = ideal_y + (fieldSquareSize ) / 2;
+	/*
 	const int leftBorder = ideal_x - (fieldSquareSize - matchSquareSize) / 2;
 	const int upBorder = ideal_y - (fieldSquareSize - matchSquareSize) / 2;
 	const int rightBorder = ideal_x + (fieldSquareSize + matchSquareSize) / 2;
 	const int downBorder = ideal_y + (fieldSquareSize + matchSquareSize) / 2;
-
+	*/
 	const int leftBorder2 = (img2.cols - matchSquareSize) / 2;
 	const int upBorder2 = (img2.rows - matchSquareSize) / 2;
 	const int rightBorder2 = (img2.cols + matchSquareSize) / 2;
@@ -114,8 +120,8 @@ void spEstimate(int ideal_x, int ideal_y, float ideal_angle, Mat img1, Mat img2)
 	float tempAngle = ideal_angle;	// 評価の中心角の初期化
 
 	// 理想座標の指定（エンコーダやサーボの指定値による）
-	ideal_Pt.x -= leftBorder;
-	ideal_Pt.y -= upBorder;
+	ideal_Pt.x -= leftBorder + matchSquareSize/2;
+	ideal_Pt.y -= upBorder + matchSquareSize/2;
 
 
 	MatchingEvaluation(fieldMap, matchMap, ideal_angle, tempAngle, kakudoHaba1, kizamiKakudo1, ideal_Pt.x, ideal_Pt.y);
@@ -136,7 +142,7 @@ void spEstimate(int ideal_x, int ideal_y, float ideal_angle, Mat img1, Mat img2)
 // _MatchArea => a:1 b:2 c:3
 # define _MatchArea 1
 
-int ideal_angle = -8;
+int ideal_angle = 0;
 
 # if _MatchArea == 1
 int		ideal_x = 175;
@@ -156,25 +162,29 @@ int		ideal_y = _FieldWidth / 2;
 void Manage2URG_Drive::tMatching(int& pos_x, int& pos_y, double& angle){
 	clock_t start = clock();
 
-	sp_x = pos_x;
-	sp_y = pos_y;
-	sp_angle = angle * 180 / PI;
+	sp_x = ideal_x = pos_x;
+	sp_y = ideal_y = pos_y;
+	sp_angle = ideal_angle = -angle * 180 / PI;
 
 	this->getAroundImage();
 
 	spEstimate(sp_x, sp_y, sp_angle, tmMap, tmTemplate);
 
 	// ↓これの結果とsp_angleがマッチング結果の座標と角度の絶対値(フィールド画像の座標系)
+	
 	sp_x += ideal_x - (fieldSquareSize - matchSquareSize) / 2;
 	sp_y += ideal_y - (fieldSquareSize - matchSquareSize) / 2;
-
+	/*
+	sp_x += ideal_x - (fieldSquareSize) / 2;
+	sp_y += ideal_y - (fieldSquareSize) / 2;
+	*/
 	std::cout << "入力：\n相対度\tx,y\n" << ideal_angle << "   \t" << ideal_x << "," << ideal_y << std::endl;
 	std::cout << "出力：\n相対度\tx,y\n" << sp_angle << "   \t" << sp_x << "," << sp_y << std::endl;
 	std::cout << "処理時間：" << clock() - start << "[ms]" << std::endl;
 
 	pos_x = sp_x;
 	pos_y = sp_y;
-	angle = sp_angle * PI / 180;
+	angle = -sp_angle * PI / 180;
 
 	waitKey(0);
 }

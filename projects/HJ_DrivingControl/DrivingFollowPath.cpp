@@ -209,13 +209,15 @@ void	DrivingFollowPath::calcRotationAngle()
 
 
 	// aÅ~bÇ∆|a|,|b|ÇéZèoÇµÇƒarcsinÇ≈âÒì]äpÇéZèo
-	/*double det = vector1_x * vector2_y - vector1_y * vector2_x;
+	/*
+	double det = vector1_x * vector2_y - vector1_y * vector2_x;
 	double d1 = pow((double)(vector1_x*vector1_x + vector1_y*vector1_y), 0.5);
 	double d2 = pow((double)(vector2_x*vector2_x + vector2_y*vector2_y), 0.5);
 	radian = asin((double)det / (d1*d2));
 	double inner = vector1_x * vector1_y + vector2_y * vector2_x;
-	//radian = atan2(det, inner);*/
+	radian = atan2(det, inner);*/
 
+	
 	double det = vector1_x * vector2_y_rotate - vector1_y * vector2_x_rotate;
 	double d1 = pow((double)(vector1_x*vector1_x + vector1_y*vector1_y), 0.5);
 	double d2 = pow((double)(vector2_x_rotate*vector2_x_rotate + vector2_y_rotate*vector2_y_rotate), 0.5);
@@ -291,13 +293,13 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 
 	int time = timer.getLapTime(1, Timer::millisec, false) - 1000;
 	if (time < 0) time = 0;
-	
+	/*
 	cout << time << "millisec" << endl;
 	cout << time * abs(aimCount_L) << "," << abs(leftCount) * waittime << endl;
 	cout << leftCount << "," << rightCount << endl;
 	cout << aimCount_L << "," << aimCount_R << endl;
 	cout << waittime << endl;
-	
+	*/
 
 
 	if (((float)time + 1000) / (float)waittime * 100 > 98) return;
@@ -309,7 +311,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 	{
 		cout << "îÒèÌí‚é~ÇµÇƒÇÈÇ©Ç‡" << endl;
 		DrivingControl::sendDrivingCommand(1, 0, 0, 0);
-		if (retLastRead){
+		if (!retLastRead){
 			if (MessageBoxA(NULL, "Ç‡ÇµÇ©ÇµÇƒîÒèÌí‚é~ÇµÇƒÇÈÅHÅH\nìÆÇ¢ÇƒÇ‡Ç¢Ç¢ÅHÅH", "Ç‡ÇµÇ©ÇµÇƒÅI", MB_YESNO | MB_ICONSTOP) == IDYES)
 				restart(time, timer,encoderLRtmp);
 		}
@@ -356,21 +358,20 @@ void DrivingFollowPath::run_FF()
 		do{
 			if (aimCount_L > 0) sendDrivingCommand_count(RIGHT, aimCount_L);
 			else sendDrivingCommand_count(LEFT, aimCount_L);
-			//waitDriveComplete_FF();
+			waitDriveComplete_FF();
 		} while (overdelayCount);
-		//Sleep(500);
+		Sleep(500);
 
 		cout << "íºêi" << endl;
 		calcMovingDistance();
 		do{
 			if (aimCount_L > 0) sendDrivingCommand_count(FORWARD, aimCount_L);
 			else sendDrivingCommand_count(BACKWARD, aimCount_L);
-			//waitDriveComplete_FF();
+			waitDriveComplete_FF();
 		} while (overdelayCount);
-		//Sleep(500);
+		Sleep(500);
 
-		if(doMatching)
-			mUrgd.tMatching(x_next, y_next, orientation);
+		if(doMatching)	mUrgd.tMatching(x_next, y_next, orientation);
 	}
 }
 // FBÇ≈ãÏìÆÇäJénÇ∑ÇÈ(âﬂãéÇÃà‚éY)
