@@ -6,19 +6,30 @@ int imgWidth, imgHeight, imgResolution;
 int main(int argc, char* argv[])
 {
 	//URGのCOMポートを指定
-	int URG_COM[] = { 6, 27 };
+	int URG_COM[] = { 26, 25};
+
+	cout << "URG_COM" << endl;
+	//cin >> URG_COM[0];
+	//cin >> URG_COM[1];
 
 	//URGの位置を指定
 	float urgPOS[][4] = { 20.0, 350.0, -280.0, 0.5236,
 		20.0, 350.0, 280.0, -0.5236 };
 
 	//ArduinoのCOMポートを指定
-	int ARDUINO_COM = 10;
+	int ARDUINO_COM = 9;
+	cout << "ARDUINO_COM" << endl;
+	//cin >> ARDUINO_COM;
 
 	//pcimageの引数
-	imgWidth = 1000;
-	imgHeight = 1000;
+	imgWidth = 600;
+	imgHeight = 600;
 	imgResolution = 5;
+
+	cout << "imgWidth, imgHeight, imgResolution" << endl;
+	//cin >> imgWidth;
+	//cin >> imgHeight;
+	//cin >> imgResolution;
 
 	
 	cout << argc << endl;

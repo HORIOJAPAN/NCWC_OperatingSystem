@@ -68,7 +68,7 @@ class DrivingFollowPath
 {
 private:
 	// 経路データ読み取り用変数
-	const string	fileName;			// 経路ファイル名
+	string	fileName;			// 経路ファイル名
 	const string	searchWord = ",";	// データの区切り識別用の","
 	ifstream	ifs;					// ファイルストリーム
 	string	str, x_str, y_str;		// データ読み取りに使用する変数
@@ -96,6 +96,8 @@ private:
 	HANDLE	hEncoderComm;
 	bool	isEncoderInitialized = false;
 	int		leftCount, rightCount;
+	int		totalLeftCount, totalRightCount;
+	float	rotation;
 
 	// Arduinoへの駆動指令関連
 	enum Direction	{ STOP, FORWARD, BACKWARD, RIGHT, LEFT };

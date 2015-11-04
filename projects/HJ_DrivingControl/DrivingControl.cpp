@@ -221,8 +221,13 @@ void DrivingFollowPath::getEncoderCount()
 	}
 
 	leftCount += (signed char)receive_data[0];
+	totalLeftCount += (signed char)receive_data[0];
 	rightCount += (signed char)receive_data[1];
+	totalRightCount += (signed char)receive_data[1];
 	//cout << "L:" << leftCount << ",R:" << rightCount << endl;
+
+	// ‰ñ“]Šp[rad]
+	rotation = -(totalLeftCount * leftCoefficient - totalRightCount * rightCoefficient) / (wheelDistance * 2);
 }
 
 void DrivingFollowPath::sendDrivingCommand_count( Direction direction , int count)
@@ -303,6 +308,9 @@ void	DrivingFollowPath::calcRotationAngle()
 
 	vector1_x = x_now - x_old;
 	vector1_y = y_now - y_old;
+
+	//vector1_x = sin(rotation);
+	//vector1_y = y_now - y_old;
 
 	vector2_x = x_next - x_now;
 	vector2_y = y_next - y_now;
@@ -437,14 +445,14 @@ void DrivingFollowPath::run_FF()
 		if (aimCount_L > 0) sendDrivingCommand_count(RIGHT , aimCount_L);
 		else sendDrivingCommand_count(LEFT, aimCount_L);
 		cout << "‰ñ“]" << endl;
-		waitDriveComplete_FF();
+		//waitDriveComplete_FF();
 		Sleep(500);
 
 		calcMovingDistance();
 		if (aimCount_L > 0) sendDrivingCommand_count(FORWARD, aimCount_L);
 		else sendDrivingCommand_count(BACKWARD, aimCount_L);
 		cout << "’¼i" << endl;
-		waitDriveComplete_FF();
+		//waitDriveComplete_FF();
 		Sleep(500);
 	}
 }

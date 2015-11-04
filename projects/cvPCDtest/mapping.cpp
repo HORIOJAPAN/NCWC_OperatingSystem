@@ -11,7 +11,7 @@
 
 #define PI 3.14159265359
 
-//#define KAISUU 10
+#define KAISUU 10
 
 using namespace std;
 using namespace cv;
@@ -119,8 +119,8 @@ int Encoder(HANDLE hComm, float& dist, float& rad)
 	data_R += static_cast<int>(receive_char2);
 
 	//¶‰E—Ö‚Ì‰ñ“]—Ê‚©‚çˆÚ“®—Ê‚ğŒvZ
-	DL = receive_char1 * 24.0086517664 / 1.005 ;
-	DR = receive_char2 * 23.751783167;
+	DL = receive_char1 *23.6758719281;
+	DR = receive_char2 *23.751783167 ;
 
 	//ˆÚ“®‹——£C‰ñ“]—Ê‚ğŒvZ
 	DIS = (DL + DR) / 2;
@@ -220,6 +220,7 @@ void getDataUNKOOrigin(int URG_COM[], float URGPOS[][4], int ARDUINO_COM, int Nu
 	// p¨•\¦—p–îˆó‚Ì“Ç‚İ‚İ
 	arrowpic = imread("../../res/img/arrow.jpg");
 	if (arrowpic.empty()) arrowpic = imread("../../../res/img/arrow.jpg");
+	if (arrowpic.empty()) arrowpic = imread("arrow.jpg");
 	if (arrowpic.empty()) cout << "No arrow image" << endl;
 	arrowpic = ~arrowpic;
 	//rcvDroid.getOrientationData(defaultOrientation);
