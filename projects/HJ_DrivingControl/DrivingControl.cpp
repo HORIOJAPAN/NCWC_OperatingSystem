@@ -340,8 +340,8 @@ void	DrivingFollowPath::calcMovingDistance()
 
 	cout << "distance[m]:" << distance * 0.05 << endl;
 
-	aimCount_L = 5*distance / (dDISTANCE * leftCoefficient); // Left
-	aimCount_R = 5*distance / (dDISTANCE * rightCoefficient); // Right
+	aimCount_L = 50*distance / (dDISTANCE * leftCoefficient); // Left
+	aimCount_R = 50*distance / (dDISTANCE * rightCoefficient); // Right
 
 	//cout << "L:" << aimCount_L << ",R:" << aimCount_R << endl;
 
@@ -372,13 +372,13 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 
 	int time = timer.getLapTime(1, Timer::millisec, false) - 1000;
 	if (time < 0) time = 0;
-	
+	/*
 	cout << time << "millisec" << endl;
 	cout << time * abs(aimCount_L) << "," << abs(leftCount) * waittime << endl;
 	cout << leftCount << "," << rightCount << endl;
 	cout << aimCount_L << "," << aimCount_R << endl;
 	cout << waittime << endl;
-    
+    */
 	
 
 	if (((float)time + 1000) / (float)waittime * 100 > 98 ) return;
@@ -394,7 +394,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 			if (MessageBoxA(NULL, "もしかして非常停止してる？？\n動いてもいい？？", "もしかして！", MB_YESNO | MB_ICONSTOP) == IDYES)
                 restart(time, timer);
 		}
-	}
+	}/*
 	if (mUrgd.checkObstacle())
 	{
 		if(nowDirection != STOP) sendDrivingCommand(STOP);
@@ -402,7 +402,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 
 		while (mUrgd.checkObstacle());
 		restart(time, timer);
-	}
+	}*/
 }
 
 void DrivingFollowPath::waitDriveComplete_FF()
@@ -429,7 +429,7 @@ void DrivingFollowPath::run_FF()
 
 	char z = getchar();
 
-	mUrgd.getAroundImage();
+	//mUrgd.getAroundImage();
 
 	while (getNextPoint())
 	{
@@ -496,7 +496,7 @@ urg_driving::ObstacleEmergency Manage2URG_Drive::checkObstacle()
 	urgdArray[0].getObstacleData(dataR[0], dataR[1]);
 	urgdArray[1].getObstacleData(dataL[0], dataL[1]);
 
-	cout << "点："<< dataR[0][0] << endl;
+	//cout << "点："<< dataR[0][0] << endl;
 
     // ここに条件式
 	for (int i = 0; i < dataR[0][0]; i++)
