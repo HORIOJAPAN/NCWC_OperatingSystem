@@ -386,7 +386,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 	if (time * abs(aimCount_L) > abs(leftCount) * waittime)     left = true;
 	if (time * abs(aimCount_R) > abs(rightCount) * waittime)    right = true;
 
-	if (left && right&& nowDirection != STOP)
+	if (left && right&& nowDirection != STOP && false)
 	{
 		cout << "非常停止してるかも" << endl;
 		DrivingControl::sendDrivingCommand(1, 0, 0, 0);
@@ -429,7 +429,7 @@ void DrivingFollowPath::run_FF()
 
 	char z = getchar();
 
-	//mUrgd.getAroundImage();
+	mUrgd.getAroundImage();
 
 	while (getNextPoint())
 	{
@@ -496,14 +496,15 @@ urg_driving::ObstacleEmergency Manage2URG_Drive::checkObstacle()
 	urgdArray[0].getObstacleData(dataR[0], dataR[1]);
 	urgdArray[1].getObstacleData(dataL[0], dataL[1]);
 
-	cout << "点："<< dataR[0][0] << endl;
+	cout << "点L："<< dataR[0][0] << endl;
+	cout << "点R："<< dataL[0][0] << endl;
 
     // ここに条件式
 	for (int i = 0; i < dataR[0][0]; i++)
 	{
 		for (int j = 0; j < dataL[0][0]; j++)
 		{
-			adis = pow(((dataR[0][i] - 280) - dataL[0][j]), 2) + pow(((dataR[1][i] - 280) - dataL[1][j]), 2);
+			adis = pow((dataR[0][i] - dataL[0][j]), 2) + pow((dataR[1][i] - (dataL[1][j] + 280)), 2);
 			if (adis < bdis)
 			{
 				bdis = adis;
@@ -618,12 +619,12 @@ void urg_driving::getObstacleData(float*& data_x, float*& data_y)
 		y = (float)(l * sin(radian));
 		z = urgpos[0];
 
-		ideal_x = (float)(l * cos(radian + (double)urgpos[3]));
-		ideal_y = (float)(l * sin(radian + (double)urgpos[3]));
-
 		// 右センサの領域判別
 		if (urgpos[2] > 0)
 		{
+			ideal_x = (float)(l * cos(radian - (double)urgpos[3]));
+			ideal_y = (float)(l * sin(radian - (double)urgpos[3]));
+
 			if (ideal_x < 1000.0 && ideal_y < 200.0 && ideal_y > -500.0)
 				//if (ideal_x < 500.0)
 			{
@@ -635,6 +636,9 @@ void urg_driving::getObstacleData(float*& data_x, float*& data_y)
 		// 左センサの領域判別
 		else if (urgpos[2] < 0)
 		{
+			ideal_x = (float)(l * cos(radian - (double)urgpos[3]));
+			ideal_y = (float)(l * sin(radian - (double)urgpos[3]));
+
 			if (ideal_x < 1000.0 && ideal_y < 500.0 && ideal_y > -200.0)
 			{
 				data_x[datacount] = ideal_x;
