@@ -437,15 +437,15 @@ void DrivingFollowPath::run_FF()
 		calcRotationAngle();
 		if (aimCount_L > 0) sendDrivingCommand_count(RIGHT , aimCount_L);
 		else sendDrivingCommand_count(LEFT, aimCount_L);
-		waitDriveComplete_FF();
-		Sleep(500);
+		//waitDriveComplete_FF();
+		//Sleep(500);
 
 		cout << "’¼i" << endl;
 		calcMovingDistance();
 		if (aimCount_L > 0) sendDrivingCommand_count(FORWARD, aimCount_L);
 		else sendDrivingCommand_count(BACKWARD, aimCount_L);
-		waitDriveComplete_FF();
-		Sleep(500);
+		//waitDriveComplete_FF();
+		//Sleep(500);
 	}
 }
 void DrivingFollowPath::run()
