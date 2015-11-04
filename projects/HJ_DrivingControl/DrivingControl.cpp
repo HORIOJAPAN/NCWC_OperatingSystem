@@ -402,7 +402,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 
 		while (mUrgd.checkObstacle());
 		restart(time, timer);
-	}
+}
 }
 
 void DrivingFollowPath::waitDriveComplete_FF()
@@ -433,19 +433,19 @@ void DrivingFollowPath::run_FF()
 
 	while (getNextPoint())
 	{
+		cout << "‰ñ“]" << endl;
 		calcRotationAngle();
 		if (aimCount_L > 0) sendDrivingCommand_count(RIGHT , aimCount_L);
 		else sendDrivingCommand_count(LEFT, aimCount_L);
-		cout << "‰ñ“]" << endl;
-		waitDriveComplete_FF();
-		Sleep(500);
+		//waitDriveComplete_FF();
+		//Sleep(500);
 
+		cout << "’¼i" << endl;
 		calcMovingDistance();
 		if (aimCount_L > 0) sendDrivingCommand_count(FORWARD, aimCount_L);
 		else sendDrivingCommand_count(BACKWARD, aimCount_L);
-		cout << "’¼i" << endl;
-		waitDriveComplete_FF();
-		Sleep(500);
+		//waitDriveComplete_FF();
+		//Sleep(500);
 	}
 }
 void DrivingFollowPath::run()
