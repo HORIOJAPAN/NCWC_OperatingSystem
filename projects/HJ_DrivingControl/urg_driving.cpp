@@ -82,7 +82,7 @@ void urg_driving::getObstacleData(float*& data_x, float*& data_y)
 			ideal_x = (float)(l * cos(radian - (double)urgpos[3]));
 			ideal_y = (float)(l * sin(radian - (double)urgpos[3]));
 
-			if (ideal_x < 1000.0 && ideal_y < 200.0 && ideal_y > -500.0)
+			if (ideal_x < 1000.0 && ideal_y < 250.0 && ideal_y > -770.0)
 				//if (ideal_x < 500.0)
 			{
 				data_x[datacount] = ideal_x;
@@ -96,7 +96,7 @@ void urg_driving::getObstacleData(float*& data_x, float*& data_y)
 			ideal_x = (float)(l * cos(radian - (double)urgpos[3]));
 			ideal_y = (float)(l * sin(radian - (double)urgpos[3]));
 
-			if (ideal_x < 1000.0 && ideal_y < 500.0 && ideal_y > -200.0)
+			if (ideal_x < 1000.0 && ideal_y < 770.0 && ideal_y > -250.0)
 			{
 				data_x[datacount] = ideal_x;
 				data_y[datacount] = ideal_y;
