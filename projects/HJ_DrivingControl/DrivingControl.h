@@ -13,9 +13,11 @@
 #include "../cvPCDtest/urg_unko.h"
 
 using namespace std;
+#define PI 3.14159265359
 
 void getArduinoHandle(int arduinoCOM, HANDLE& hComm, int timeoutmillisec);
 
+// 駆動指令の基本クラス
 class DrivingControl
 {
 protected:
@@ -35,6 +37,7 @@ public:
 	void sendDrivingCommand(int mode_int, int forward_int, int  crosswise_int, int delay_int);
 };
 
+// URGで駆動中の障害物検出を行うクラス
 class urg_driving
 	: public urg_mapping
 {
@@ -43,6 +46,8 @@ public:
 	ObstacleEmergency checkObstacle();
 	void getObstacleData(float*& data_x , float*& data_y);
 };
+
+// 左右のURGをまとめて管理するクラス
 class Manage2URG_Drive
 {
 private:
@@ -63,6 +68,7 @@ public:
 	void tMatching();
 };
 
+// 経路データを読み込んで駆動指令を行うやつ
 class DrivingFollowPath
 	: public DrivingControl
 {

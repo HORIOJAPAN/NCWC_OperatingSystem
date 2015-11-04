@@ -76,7 +76,10 @@
     <ClCompile Include="..\cvPCDtest\urg_unko.cpp" />
     <ClCompile Include="..\Timer\Timer.cpp" />
     <ClCompile Include="DrivingControl.cpp" />
+    <ClCompile Include="DrivingFollowPath.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Manage2URG_Drive.cpp" />
+    <ClCompile Include="urg_driving.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DrivingControl.h" />
