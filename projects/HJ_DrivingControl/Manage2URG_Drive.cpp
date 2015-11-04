@@ -26,8 +26,8 @@ urg_driving::ObstacleEmergency Manage2URG_Drive::checkObstacle()
 	urgdArray[0].getObstacleData(dataR[0], dataR[1]);
 	urgdArray[1].getObstacleData(dataL[0], dataL[1]);
 
-	cout << "点L：" << dataR[0][0] << endl;
-	cout << "点R：" << dataL[0][0] << endl;
+	//cout << "点L：" << dataR[0][0] << endl;
+	//cout << "点R：" << dataL[0][0] << endl;
 
 	// ここに条件式
 	for (int i = 0; i < dataR[0][0]; i++)

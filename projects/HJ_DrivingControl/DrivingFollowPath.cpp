@@ -135,15 +135,15 @@ void DrivingFollowPath::sendDrivingCommand(Direction direction, int delay_int)
 	nowDirection = direction;
 
 	// delay_int‚Í99999ˆÈã‚ðŽw’è‚Å‚«‚È‚¢‚Ì‚Å
-	if (delay_int > 99999)
-	{
-		overdelayCount = delay_int / 90000;
-		delay_int = delay_int % 90000;
-	}
-	else if (overdelayCount)
+	if (overdelayCount)
 	{
 		delay_int = 90000;
 		overdelayCount--;
+	}
+	else if (delay_int > 99999)
+	{
+		overdelayCount = delay_int / 90000;
+		delay_int = delay_int % 90000;
 	}
 
 	// STOP‚ÌŽž‚Í‘Ò‹@ŽžŠÔ‚ð•Û‘¶‚µ‚È‚¢
@@ -266,13 +266,13 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 
 	int time = timer.getLapTime(1, Timer::millisec, false) - 1000;
 	if (time < 0) time = 0;
-	/*
+	
 	cout << time << "millisec" << endl;
 	cout << time * abs(aimCount_L) << "," << abs(leftCount) * waittime << endl;
 	cout << leftCount << "," << rightCount << endl;
 	cout << aimCount_L << "," << aimCount_R << endl;
 	cout << waittime << endl;
-	*/
+	
 
 
 	if (((float)time + 1000) / (float)waittime * 100 > 98) return;
@@ -323,12 +323,6 @@ void DrivingFollowPath::run_FF()
 	char z = getchar();
 
 	//mUrgd.getAroundImage();
-
-	do{
-		sendDrivingCommand(FORWARD, 120000);
-		waitDriveComplete_FF();
-	} while (overdelayCount);
-	Sleep(500);
 
 	while (getNextPoint())
 	{
