@@ -429,7 +429,7 @@ void DrivingFollowPath::run_FF()
 
 	char z = getchar();
 
-	mUrgd.getAroundImage();
+	//mUrgd.getAroundImage();
 
 	while (getNextPoint())
 	{
@@ -437,15 +437,15 @@ void DrivingFollowPath::run_FF()
 		calcRotationAngle();
 		if (aimCount_L > 0) sendDrivingCommand_count(RIGHT , aimCount_L);
 		else sendDrivingCommand_count(LEFT, aimCount_L);
-		//waitDriveComplete_FF();
-		//Sleep(500);
+		waitDriveComplete_FF();
+		Sleep(500);
 
 		cout << "直進" << endl;
 		calcMovingDistance();
 		if (aimCount_L > 0) sendDrivingCommand_count(FORWARD, aimCount_L);
 		else sendDrivingCommand_count(BACKWARD, aimCount_L);
-		//waitDriveComplete_FF();
-		//Sleep(500);
+		waitDriveComplete_FF();
+		Sleep(500);
 	}
 }
 void DrivingFollowPath::run()
@@ -503,7 +503,7 @@ urg_driving::ObstacleEmergency Manage2URG_Drive::checkObstacle()
 	{
 		for (int j = 0; j < dataL[0][0]; j++)
 		{
-			adis = pow((dataR[0][i] - (dataL[0][j] + 280)), 2) + pow((dataR[1][i] - (dataL[1][j] + 280)), 2);
+			adis = pow(((dataR[0][i] - 280) - dataL[0][j]), 2) + pow(((dataR[1][i] - 280) - dataL[1][j]), 2);
 			if (adis < bdis)
 			{
 				bdis = adis;
@@ -573,7 +573,7 @@ urg_driving::ObstacleEmergency urg_driving::checkObstacle()
 		// 右センサの領域判別
 		if (urgpos[2] > 0)
 		{
-			if (ideal_x < 1000.0 && ideal_y < 500.0 && ideal_y > -200.0)
+			if (ideal_x < 1000.0 && ideal_y < 200.0 && ideal_y > -500.0)
 			//if (ideal_x < 500.0)
 			{
 				count += 1;
@@ -582,7 +582,7 @@ urg_driving::ObstacleEmergency urg_driving::checkObstacle()
 		// 左センサの領域判別
 		else if (urgpos[2] < 0)
 		{
-			if (ideal_x < 1000.0 && ideal_y < 200.0 && ideal_y > -500.0)
+			if (ideal_x < 1000.0 && ideal_y < 500.0 && ideal_y > -200.0)
 			{
 				count += 1;
 			}
@@ -624,7 +624,7 @@ void urg_driving::getObstacleData(float*& data_x, float*& data_y)
 		// 右センサの領域判別
 		if (urgpos[2] > 0)
 		{
-			if (ideal_x < 1000.0 && ideal_y < 500.0 && ideal_y > -200.0)
+			if (ideal_x < 1000.0 && ideal_y < 200.0 && ideal_y > -500.0)
 				//if (ideal_x < 500.0)
 			{
 				data_x[datacount] = ideal_x;
@@ -635,7 +635,7 @@ void urg_driving::getObstacleData(float*& data_x, float*& data_y)
 		// 左センサの領域判別
 		else if (urgpos[2] < 0)
 		{
-			if (ideal_x < 1000.0 && ideal_y < 200.0 && ideal_y > -500.0)
+			if (ideal_x < 1000.0 && ideal_y < 500.0 && ideal_y > -200.0)
 			{
 				data_x[datacount] = ideal_x;
 				data_y[datacount] = ideal_y;
