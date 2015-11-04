@@ -46,19 +46,27 @@ bool DrivingFollowPath::getNextPoint()
 	if (!getline(ifs, str)) return false;
 
 	//æ“ª‚©‚ç","‚Ü‚Å‚Ì•¶š—ñ‚ğintŒ^‚Åæ“¾
-	x_pos = str.find(searchWord);
-	if (x_pos != string::npos){
-		x_str = str.substr(0, x_pos);
+	begin = str.find(searchWord);
+	if (begin != string::npos){
+		x_str = str.substr(0, begin);
 		x_next = stoi(x_str);
 	}
 
 	//x‚Ì’l‚ÌŒã‚ë‚©‚ç","‚Ü‚Å‚Ì•¶š—ñ‚ğintŒ^‚Åæ“¾
-	y_pos = str.find(searchWord, x_pos + 1);
-	if (y_pos != string::npos){
-		y_str = str.substr(x_pos + 1, y_pos);
+	end = str.find(searchWord, begin + 1);
+	if (end != string::npos){
+		y_str = str.substr(begin + 1, end - begin + 1);
 		y_next = stoi(y_str);
 	}
-	cout << x_next << "," << y_next << endl;
+
+	begin = end;
+	end = str.find(searchWord, begin + 1);
+	if (end != string::npos){
+		data_str = str.substr(begin + 1, end - begin + 1);
+		doMatching = stoi(data_str);
+	}
+
+	cout << "X:" << x_next << ",Y:" << y_next << ",Matching" << doMatching << endl;
 
 	return true;
 }
@@ -181,22 +189,39 @@ void DrivingFollowPath::sendDrivingCommand(Direction direction, int delay_int)
 void	DrivingFollowPath::calcRotationAngle()
 {
 	// 3“_‚©‚çƒxƒNƒgƒ‹‚ğ2‚Â—pˆÓ
-	int vector1_x, vector1_y;
-	int vector2_x, vector2_y;
+	double vector1_x, vector1_y;
+	double vector2_x, vector2_y;
 
 	vector1_x = x_now - x_old;
 	vector1_y = y_now - y_old;
 
+	vector1_x = cos(orientation);
+	vector1_y = sin(orientation);
+
+	vector1_x = 1;
+	vector1_y = 0;
+
 	vector2_x = x_next - x_now;
 	vector2_y = y_next - y_now;
 
+	double vector2_x_rotate = vector2_x * cos(-orientation) - vector2_y * sin(-orientation);
+	double vector2_y_rotate = vector2_x * sin(-orientation) + vector2_y * cos(-orientation);
+
+
 	// a~b‚Æ|a|,|b|‚ğZo‚µ‚Äarcsin‚Å‰ñ“]Šp‚ğZo
-	int det = vector1_x * vector2_y - vector1_y * vector2_x;
+	/*double det = vector1_x * vector2_y - vector1_y * vector2_x;
 	double d1 = pow((double)(vector1_x*vector1_x + vector1_y*vector1_y), 0.5);
 	double d2 = pow((double)(vector2_x*vector2_x + vector2_y*vector2_y), 0.5);
 	radian = asin((double)det / (d1*d2));
+	double inner = vector1_x * vector1_y + vector2_y * vector2_x;
+	//radian = atan2(det, inner);*/
 
-	int inner = vector1_x * vector1_y + vector2_y * vector2_x;
+	double det = vector1_x * vector2_y_rotate - vector1_y * vector2_x_rotate;
+	double d1 = pow((double)(vector1_x*vector1_x + vector1_y*vector1_y), 0.5);
+	double d2 = pow((double)(vector2_x_rotate*vector2_x_rotate + vector2_y_rotate*vector2_y_rotate), 0.5);
+	radian = asin((double)det / (d1*d2));
+
+	//double inner = vector1_x * vector1_y + vector2_y_rotate * vector2_x_rotate;
 	//radian = atan2(det, inner);
 
 	orientation += radian;
@@ -331,18 +356,21 @@ void DrivingFollowPath::run_FF()
 		do{
 			if (aimCount_L > 0) sendDrivingCommand_count(RIGHT, aimCount_L);
 			else sendDrivingCommand_count(LEFT, aimCount_L);
-			waitDriveComplete_FF();
+			//waitDriveComplete_FF();
 		} while (overdelayCount);
-		Sleep(500);
+		//Sleep(500);
 
 		cout << "’¼i" << endl;
 		calcMovingDistance();
 		do{
 			if (aimCount_L > 0) sendDrivingCommand_count(FORWARD, aimCount_L);
 			else sendDrivingCommand_count(BACKWARD, aimCount_L);
-			waitDriveComplete_FF();
+			//waitDriveComplete_FF();
 		} while (overdelayCount);
-		Sleep(500);
+		//Sleep(500);
+
+		if(doMatching)
+			mUrgd.tMatching(x_next, y_next, orientation);
 	}
 }
 // FB‚Å‹ì“®‚ğŠJn‚·‚é(‰ß‹‚ÌˆâY)
@@ -372,4 +400,7 @@ void DrivingFollowPath::setURGParam(int URG_COM[], float URGPOS[][4], int NumOfU
 {
 	mUrgd.setURGParam(URG_COM, URGPOS, NumOfURG);
 }
-
+void DrivingFollowPath::readMapImage(string mapName)
+{
+	mUrgd.readMapImage(mapName);
+}

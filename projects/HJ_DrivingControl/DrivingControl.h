@@ -52,20 +52,19 @@ class Manage2URG_Drive
 {
 private:
 	urg_driving* urgdArray;
+	cv::Mat tmMap;
 	cv::Mat tmTemplate;
 public:
 	~Manage2URG_Drive();
 
 	void setURGParam(int URG_COM[], float URGPOS[][4], int NumOfURG);
+	void readMapImage(string mapName );
 	
     urg_driving::ObstacleEmergency checkObstacle();
 
 	void getAroundImage(int width = 300 , int height = 300 , int resolution = 5 ,int measurementTimes = 10);
 
-	/********************************************
-    // ここで自己位置推定の処理を行うかな？
-    *********************************************/
-	void tMatching();
+	void tMatching(int& pos_x , int& pos_y , double& angle);
 };
 
 // 経路データを読み込んで駆動指令を行うやつ
@@ -77,13 +76,15 @@ private:
 	const string	fileName;			// 経路ファイル名
 	const string	searchWord = ",";	// データの区切り識別用の","
 	ifstream	ifs;					// ファイルストリーム
-	string	str, x_str, y_str;		// データ読み取りに使用する変数
-	string::size_type	x_pos, y_pos;
+	string	str, x_str, y_str , data_str;		// データ読み取りに使用する変数
+	string::size_type	begin, end;
 
 	// ベクトルを2つ使用する為3点保存する
 	int	x_old, y_old;					// 1つ前の座標
 	int x_now, y_now;					// 現在の座標
 	int	x_next = 0, y_next = 0;			// 次の座標
+
+	int doMatching;
     
 	// 駆動指令計算用変数
 	double	orientation;			// 現在向いている方位角(スタート直後を0として右向きが正)
@@ -131,6 +132,7 @@ public:
 	DrivingFollowPath(string fname, double coefficientL, double coefficientR, int arduioCOM, int ctrlrCOM);
 
 	void setURGParam(int URG_COM[], float URGPOS[][4], int NumOfURG);
+	void readMapImage(string mapName);
 
 	// 次の点を読み込む
 	bool getNextPoint();

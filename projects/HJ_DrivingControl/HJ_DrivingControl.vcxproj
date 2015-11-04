@@ -79,6 +79,7 @@
     <ClCompile Include="DrivingFollowPath.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Manage2URG_Drive.cpp" />
+    <ClCompile Include="SelfPositionEstimate.cpp" />
     <ClCompile Include="urg_driving.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -78,3 +78,13 @@ void Manage2URG_Drive::getAroundImage(int width, int height, int resolution, int
 	cv::imshow("show", tmTemplate);
 	cv::waitKey(0);
 }
+
+void Manage2URG_Drive::readMapImage(string mapName)
+{
+	tmMap = cv::imread(mapName);
+	if (tmMap.empty())
+	{
+		cout << "False read Map image" << endl;
+		int z = getchar();
+	}
+}
