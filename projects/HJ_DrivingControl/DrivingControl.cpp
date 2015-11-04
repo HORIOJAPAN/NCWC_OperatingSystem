@@ -571,18 +571,18 @@ urg_driving::ObstacleEmergency urg_driving::checkObstacle()
 		ideal_y = (float)(l * sin(radian + (double)urgpos[3]));
 
 		// 右センサの領域判別
-		if (urgpos[2] < 0)
+		if (urgpos[2] > 0)
 		{
-			if (ideal_x < 1000.0 && ideal_y < 200.0 && ideal_y > -500.0)
+			if (ideal_x < 1000.0 && ideal_y < 500.0 && ideal_y > -200.0)
 			//if (ideal_x < 500.0)
 			{
 				count += 1;
 			}
 		}
 		// 左センサの領域判別
-		else if (urgpos[2] > 0)
+		else if (urgpos[2] < 0)
 		{
-			if (ideal_x < 1000.0 && ideal_y < 500.0 && ideal_y > -200.0)
+			if (ideal_x < 1000.0 && ideal_y < 200.0 && ideal_y > -500.0)
 			{
 				count += 1;
 			}
@@ -622,9 +622,9 @@ void urg_driving::getObstacleData(float*& data_x, float*& data_y)
 		ideal_y = (float)(l * sin(radian + (double)urgpos[3]));
 
 		// 右センサの領域判別
-		if (urgpos[2] < 0)
+		if (urgpos[2] > 0)
 		{
-			if (ideal_x < 1000.0 && ideal_y < 200.0 && ideal_y > -500.0)
+			if (ideal_x < 1000.0 && ideal_y < 500.0 && ideal_y > -200.0)
 				//if (ideal_x < 500.0)
 			{
 				data_x[datacount] = ideal_x;
@@ -633,9 +633,9 @@ void urg_driving::getObstacleData(float*& data_x, float*& data_y)
 			}
 		}
 		// 左センサの領域判別
-		else if (urgpos[2] > 0)
+		else if (urgpos[2] < 0)
 		{
-			if (ideal_x < 1000.0 && ideal_y < 500.0 && ideal_y > -200.0)
+			if (ideal_x < 1000.0 && ideal_y < 200.0 && ideal_y > -500.0)
 			{
 				data_x[datacount] = ideal_x;
 				data_y[datacount] = ideal_y;
