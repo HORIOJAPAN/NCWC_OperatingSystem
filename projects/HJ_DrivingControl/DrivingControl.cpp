@@ -129,4 +129,3 @@ void DrivingControl::sendDrivingCommand(int mode_int, int forward_int, int  cros
 
 	cout << retLastRead << endl;
 }
-

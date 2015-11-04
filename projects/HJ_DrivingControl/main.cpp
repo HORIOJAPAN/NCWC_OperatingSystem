@@ -12,7 +12,7 @@ void main()
 	float urgPOS[][4] = { 20.0, 350.0, -280.0, 0.5236,
 		20.0, 350.0, 280.0, -0.5236 };
 
-	DrivingFollowPath DFP("../../data/route/rouka.rt", 24.0086517664 / 1.005, 23.751783167, ENCODER_COM, CONTROLLER_COM);
+	DrivingFollowPath DFP("../../data/route/test09.rt", 24.0086517664 / 1.005, 23.751783167, ENCODER_COM, CONTROLLER_COM);
 	DFP.setURGParam(URG_COM, urgPOS, sizeof(URG_COM) / sizeof(int));
 	DFP.run_FF();
 

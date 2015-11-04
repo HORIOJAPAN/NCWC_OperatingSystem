@@ -125,8 +125,8 @@ int urg_unko::getData4URG(float dist,float old, float rad){
 #if 1
 	//ƒf[ƒ^‚Ìæ“¾”ÍˆÍ‚ğ•ÏX‚·‚éê‡
 	urg_set_scanning_parameter(&urg,
-		urg_deg2step(&urg, -105),
-		urg_deg2step(&urg, +105), 0);
+		urg_deg2step(&urg, -120),
+		urg_deg2step(&urg, +120), 0);
 #endif
 
 	//ÏZ‚µ‚½‹——£,‰ñ“]Šp‚ğŠi”[

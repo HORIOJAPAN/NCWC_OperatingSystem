@@ -19,21 +19,22 @@ Manage2URG_Drive::~Manage2URG_Drive()
 urg_driving::ObstacleEmergency Manage2URG_Drive::checkObstacle()
 {
 
-	float* data0[2], *data1[2];
+	float* dataL[2], *dataR[2];
 	float adis = 0.0, bdis = 0.0;
 	int count = 0;
 
-	urgdArray[0].getObstacleData(data0[0], data0[1]);
-	urgdArray[1].getObstacleData(data1[0], data1[1]);
+	urgdArray[0].getObstacleData(dataR[0], dataR[1]);
+	urgdArray[1].getObstacleData(dataL[0], dataL[1]);
 
-	cout << "点：" << data0[0][0] << endl;
+	cout << "点L：" << dataR[0][0] << endl;
+	cout << "点R：" << dataL[0][0] << endl;
 
 	// ここに条件式
-	for (int i = 0; i < data0[0][0]; i++)
+	for (int i = 0; i < dataR[0][0]; i++)
 	{
-		for (int j = 0; j < data1[0][0]; j++)
+		for (int j = 0; j < dataL[0][0]; j++)
 		{
-			adis = pow((data0[0][i] - (data1[0][j] + 280)), 2) + pow((data0[1][i] - (data1[1][j] + 280)), 2);
+			adis = pow((dataR[0][i] - dataL[0][j]), 2) + pow((dataR[1][i] - (dataL[1][j] + 280)), 2);
 			if (adis < bdis)
 			{
 				bdis = adis;
@@ -44,8 +45,8 @@ urg_driving::ObstacleEmergency Manage2URG_Drive::checkObstacle()
 		}
 	}
 
-	for (int i = 0; i < 2; i++) delete[] data0[i];
-	for (int i = 0; i < 2; i++) delete[] data1[i];
+	for (int i = 0; i < 2; i++) delete[] dataL[i];
+	for (int i = 0; i < 2; i++) delete[] dataR[i];
 
 	if (count > 10){
 		return urg_driving::ObstacleEmergency::DETECT;
