@@ -93,8 +93,8 @@ private:
     
 	// 駆動指令計算用変数
 	double	orientation;			// 現在向いている方位角(スタート直後を0として右向きが正)
-	double	radian;					// 計算後の回転角
-	double	distance;				// 計算後の移動距離
+	//double	radian;					// 計算後の回転角
+	//double	distance;				// 計算後の移動距離
 
 	const int wheelDistance = 530 / 2;	// タイヤ間距離の半分[mm]
 	//const double dDISTANCE = 24.87094184; // 1カウント当たりの距離[mm](タイヤ径を72分割)
@@ -153,9 +153,11 @@ public:
 	bool getNextPoint();
 
 	// 回転角を計算
-	void	calcRotationAngle( int nowCoord_x = -99999 , int nowCoord_y = -99999 );
+	double	calcRotationAngle( int nowCoord_x = -99999 , int nowCoord_y = -99999 );
+	void	sendRotation(double radian);
 	// 距離を計算
-	void	calcMovingDistance(int nowCoord_x = -99999, int nowCoord_y = -99999);
+	double	calcMovingDistance(int nowCoord_x = -99999, int nowCoord_y = -99999);
+	void	sendStraight(double distance);
 	// 現在地を算出
 	void	calcNowCoord(int time, int nowCoord[2]);
 	void	calcNowCoord(int time);

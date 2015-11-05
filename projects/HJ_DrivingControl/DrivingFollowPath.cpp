@@ -185,7 +185,7 @@ void DrivingFollowPath::sendDrivingCommand(Direction direction, int delay_int)
 }
 
 // 外積で回転角を計算
-void	DrivingFollowPath::calcRotationAngle( int nowCoord_x , int nowCoord_y  )
+double	DrivingFollowPath::calcRotationAngle( int nowCoord_x , int nowCoord_y  )
 {
 	// 3点からベクトルを2つ用意
 	double vector1_x, vector1_y;
@@ -214,10 +214,12 @@ void	DrivingFollowPath::calcRotationAngle( int nowCoord_x , int nowCoord_y  )
 
 	// a×bと|a|,|b|を算出してarcsinで回転角を算出
 	double det = vector1_x * vector2_y - vector1_y * vector2_x;
-	radian = asin(det);
 	double inner = vector1_x * vector2_x + vector1_y * vector2_y;
-	radian = atan2(det, inner);
 
+	return atan2(det, inner);
+}
+void	DrivingFollowPath::sendRotation(double radian)
+{
 	orientation += radian;
 
 	cout << "rad:" << radian << ", deg:" << radian / PI * 180 << endl;
@@ -229,11 +231,10 @@ void	DrivingFollowPath::calcRotationAngle( int nowCoord_x , int nowCoord_y  )
 	if (aimCount_R) aimCount_R += abs(aimCount_R) / aimCount_R;
 
 	//cout << "L:" << aimCount_L << ",R:" << aimCount_R << endl;
-
 }
 
-// 距離を計算
-void	DrivingFollowPath::calcMovingDistance(int nowCoord_x, int nowCoord_y)
+// 距離を計算[mm]
+double	DrivingFollowPath::calcMovingDistance(int nowCoord_x, int nowCoord_y)
 {
 	double	x_disp;
 	double	y_disp;
@@ -249,16 +250,21 @@ void	DrivingFollowPath::calcMovingDistance(int nowCoord_x, int nowCoord_y)
 		y_disp = y_next - nowCoord_y;
 	}
 
-	distance = sqrt(x_disp*x_disp + y_disp*y_disp);
+	return sqrt(x_disp*x_disp + y_disp*y_disp) * 50;//[mm]
 
-	cout << "distance[m]:" << distance * 0.05 << endl;
-
-	aimCount_L = 50 * distance / (dDISTANCE * leftCoefficient); // Left
-	aimCount_R = 50 * distance / (dDISTANCE * rightCoefficient); // Right
-
-	//cout << "L:" << aimCount_L << ",R:" << aimCount_R << endl;
+	
 
 }
+void	DrivingFollowPath::sendStraight(double distance)
+{
+	cout << "distance[m]:" << distance / 1000 << endl;
+
+	aimCount_L = distance / (dDISTANCE * leftCoefficient); // Left
+	aimCount_R = distance / (dDISTANCE * rightCoefficient); // Right
+
+	//cout << "L:" << aimCount_L << ",R:" << aimCount_R << endl;
+}
+
 // 前回の指令と経過時間から現在の座標を算出
 void	DrivingFollowPath::calcNowCoord(int time, int nowCoord[2])
 {
@@ -362,6 +368,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 		if (abs(dAzimuth) > angleThresh)
 		{
 			dAzimuth *= PI / 180;
+			int preWaittime = waittime;
 			if (nowDirection != STOP) sendDrivingCommand(STOP);
 
 			cout << "角度補正するなり : " << dAzimuth << "[deg]" << endl;
@@ -371,7 +378,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 			calcNowCoord(time);
 			cout << "回転" << endl;
 			//calcRotationAngle(nowCoord[0], nowCoord[1]);
-			calcRotationAngle();
+			sendRotation(dAzimuth);
 			do{
 				if (aimCount_L > 0) sendDrivingCommand_count(RIGHT, aimCount_L);
 				else sendDrivingCommand_count(LEFT, aimCount_L);
@@ -383,9 +390,9 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 			// 直進再開
 			cout << "直進" << endl;
 			//calcMovingDistance(nowCoord[0], nowCoord[1]);
-			calcMovingDistance();
-			if (aimCount_L > 0) sendDrivingCommand_count(FORWARD, aimCount_L);
-			else sendDrivingCommand_count(BACKWARD, aimCount_L);
+			sendStraight( calcMovingDistance());
+			sendDrivingCommand(FORWARD, preWaittime - time);
+			timer.getLapTime();
 		}
 	}
 }
@@ -418,7 +425,7 @@ void DrivingFollowPath::run_FF()
 	while (getNextPoint())
 	{
 		cout << "回転" << endl;
-		calcRotationAngle();
+		sendRotation( calcRotationAngle());
 		do{
 			if (aimCount_L > 0) sendDrivingCommand_count(RIGHT, aimCount_L);
 			else sendDrivingCommand_count(LEFT, aimCount_L);
@@ -428,7 +435,7 @@ void DrivingFollowPath::run_FF()
 
 		rcvDroid.getOrientationData(defaultOrientation);
 		cout << "直進" << endl;
-		calcMovingDistance();
+		sendStraight( calcMovingDistance());
 		do{
 			if (aimCount_L > 0) sendDrivingCommand_count(FORWARD, aimCount_L);
 			else sendDrivingCommand_count(BACKWARD, aimCount_L);
