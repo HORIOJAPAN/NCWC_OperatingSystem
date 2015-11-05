@@ -46,6 +46,7 @@ urg_driving::ObstacleEmergency Manage2URG_Drive::checkObstacle()
 		}
 	}*/
 
+
 	//ğŒ®2
 	for (int i = 0; i < dataR[0][0]; i++){
 		if (dataR[0][i] < 0 && dataR[1][i] < 0){
