@@ -129,6 +129,10 @@ void DrivingFollowPath::sendDrivingCommand_count(Direction direction, int count)
 		sendDrivingCommand(LEFT, count / 10.25 * 1000);
 		break;
 
+	case FORWARD_SLOW:
+		sendDrivingCommand(FORWARD_SLOW, count / 5.4 * 1000);
+		break;
+
 	default:
 		break;
 	}
@@ -165,6 +169,10 @@ void DrivingFollowPath::sendDrivingCommand(Direction direction, int delay_int)
 
 	case FORWARD:
 		DrivingControl::sendDrivingCommand(mode, -1000, 405, delay_int);
+		break;
+
+	case FORWARD_SLOW:
+		DrivingControl::sendDrivingCommand(mode, -800, 450, delay_int);
 		break;
 
 	case BACKWARD:
@@ -313,8 +321,8 @@ void DrivingFollowPath::restart(int time, Timer& timer, int encoderLRtmp[])
 	//int dRight = rightCount - encoderLRtmp[1];
 	//aimCount_L += dLeft;
 	//aimCount_R += dRight;
-	leftCount = encoderLRtmp[0];
-	rightCount = encoderLRtmp[1];
+	//leftCount = encoderLRtmp[0];
+	//rightCount = encoderLRtmp[1];
 
 	if (nowDirection != STOP) sendDrivingCommand(nowDirection, waittime - time);
 	else sendDrivingCommand(preDirection, waittime - time);
@@ -339,12 +347,12 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 	*/
 
 
-	if (((float)time + 1000) / (float)waittime * 100 > 98) return;
+	//if (((float)time + 1000) / (float)waittime * 100 > 98) return;
 
 	if (time * abs(aimCount_L) > abs(leftCount) * waittime)     left = true;
 	if (time * abs(aimCount_R) > abs(rightCount) * waittime)    right = true;
 
-	if (left && right&& nowDirection != STOP)
+	if (left || right&& nowDirection != STOP)
 	{
 		cout << "îÒèÌí‚é~ÇµÇƒÇÈÇ©Ç‡" << endl;
 		DrivingControl::sendDrivingCommand(1, 0, 0, 0);
@@ -353,32 +361,53 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 				restart(time, timer,encoderLRtmp);
 		}
 	}/*
-	if (mUrgd.checkObstacle())
+	if (urg_driving::ObstacleEmergency emergency = mUrgd.checkObstacle())
 	{
-		if (nowDirection != STOP) sendDrivingCommand(STOP);
+		if (nowDirection != STOP && nowDirection != FORWARD_SLOW ) sendDrivingCommand(STOP);
 
-		while (mUrgd.checkObstacle());
-		restart(time, timer, encoderLRtmp);
+		switch (emergency)
+		{
+		case urg_driving::ObstacleEmergency::DETECT:
+			cout << "DETECT" << endl;
+			while (mUrgd.checkObstacle());
+			restart(time, timer, encoderLRtmp);
+			break;
+
+		case urg_driving::ObstacleEmergency::SLOW1:
+		case urg_driving::ObstacleEmergency::SLOW2:
+			cout << "SLOW" << endl;
+			if (nowDirection == FORWARD_SLOW) break;
+			sendDrivingCommand(FORWARD_SLOW, (waittime - time) * 9.0 / 5.4);
+			timer.getLapTime();
+			break;
+		}
+	}
+	else if (nowDirection == FORWARD_SLOW)
+	{
+		sendDrivingCommand(FORWARD, (waittime - time) * 5.4 / 9.0);
+		timer.getLapTime();
 	}*/
+
 	// Ç‹Ç¡Ç∑ÇÆêiÇÒÇ≈Ç¢ÇÈÇ©Ç«Ç§Ç©ÇÃÇ‚Ç¬
-	if (nowDirection == FORWARD)
+	if (nowDirection == FORWARD && false)
 	{
 		rcvDroid.getOrientationData(nowOrientation);
 		dAzimuth = nowOrientation[0] - defaultOrientation[0];
+		cout << "äÓèÄ[deg]:" << defaultOrientation[0] << ",ç°[deg]:" << nowOrientation[0] << endl;
 		if (abs(dAzimuth) > angleThresh)
 		{
 			dAzimuth *= PI / 180;
 			int preWaittime = waittime;
 			if (nowDirection != STOP) sendDrivingCommand(STOP);
 
-			cout << "äpìxï‚ê≥Ç∑ÇÈÇ»ÇË : " << dAzimuth << "[deg]" << endl;
+			cout << "äpìxï‚ê≥Ç∑ÇÈÇ»ÇË : " << dAzimuth * 180 / PI << "[deg]" << endl;
 			// âÒì]ï‚ê≥
 			int nowCoord[2];
 			//calcNowCoord(time, nowCoord);
 			calcNowCoord(time);
 			cout << "âÒì]" << endl;
 			//calcRotationAngle(nowCoord[0], nowCoord[1]);
-			sendRotation(dAzimuth);
+			sendRotation(-dAzimuth);
 			do{
 				if (aimCount_L > 0) sendDrivingCommand_count(RIGHT, aimCount_L);
 				else sendDrivingCommand_count(LEFT, aimCount_L);
@@ -386,7 +415,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 			} while (overdelayCount);
 			Sleep(500);
 
-			rcvDroid.getOrientationData(defaultOrientation);
+			//rcvDroid.getOrientationData(defaultOrientation);
 			// íºêiçƒäJ
 			cout << "íºêi" << endl;
 			//calcMovingDistance(nowCoord[0], nowCoord[1]);
