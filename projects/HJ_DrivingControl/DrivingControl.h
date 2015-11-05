@@ -17,7 +17,7 @@ using namespace std;
 #define PI 3.14159265359
 
 // 直進中に角度補正する閾値
-const int angleThresh = 15;
+const int angleThresh = 10;
 
 void getArduinoHandle(int arduinoCOM, HANDLE& hComm, int timeoutmillisec);
 
@@ -47,7 +47,7 @@ class urg_driving
 	: public urg_mapping
 {
 public:
-	enum ObstacleEmergency { NONE, DETECT };
+	enum ObstacleEmergency { NONE, DETECT, SLOW1, SLOW2 };
 	ObstacleEmergency checkObstacle();
 	void getObstacleData(float*& data_x , float*& data_y);
 };
@@ -110,8 +110,8 @@ private:
 	int		leftCount, rightCount;
 
 	// Arduinoへの駆動指令関連
-	enum Direction	{ STOP, FORWARD, BACKWARD, RIGHT, LEFT };
-	int		aimCount_L, aimCount_R;
+	enum Direction	{ STOP, FORWARD , FORWARD_SLOW , BACKWARD, RIGHT, LEFT };
+	double		aimCount_L, aimCount_R;
 
 	// Android関連
 	float defaultOrientation[3];
