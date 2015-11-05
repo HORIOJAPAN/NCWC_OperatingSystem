@@ -19,7 +19,7 @@ urg_driving::ObstacleEmergency Manage2URG_Drive::checkObstacle()
 
 	float* dataL[2], *dataR[2];
 	float adis = 0.0, bdis = 0.0;
-	int count[4] = {0, 0, 0, 0};
+	int count[5] = {0, 0, 0, 0, 0};
 
 	urgdArray[0].getObstacleData(dataR[0], dataR[1]);
 	urgdArray[1].getObstacleData(dataL[0], dataL[1]);
@@ -43,15 +43,16 @@ urg_driving::ObstacleEmergency Manage2URG_Drive::checkObstacle()
 		}
 	}*/
 
+
 	//条件式2
 	for (int i = 0; i < dataR[0][0]; i++){
 		if (dataR[0][i] < 0 && dataR[1][i] < 0){
-			count[0] += 1;
+			//count[3] += 1;
 		}
 		else if (dataR[0][i] > 0){
 			for (int j = 0; j < dataL[0][0]; j++){
 				if (dataL[0][j] < 0 && dataL[1][j] > 0){
-					count[0] += 1;
+					//count[4] += 1;
 				}
 				else if ((dataL[0][j] > 0)){
 					adis = pow((dataR[0][i] - dataL[0][j]), 2) + pow((dataR[1][i] - (dataL[1][j] + 280)), 2);
@@ -60,12 +61,15 @@ urg_driving::ObstacleEmergency Manage2URG_Drive::checkObstacle()
 					}
 					if (bdis < 2500 && 600 < dataR[0][i]){
 						count[1] += 1;
+						break;
 					}
-					else if (bdis < 2500 && 300 < dataR[0][i] && dataR[0][i] < 600){
+					else if (bdis < 2500 && 500 < dataR[0][i] && dataR[0][i] < 600){
 						count[2] += 1;
+						break;
 					}
-					else if (bdis < 2500 && dataR[0][i] < 300){
-						count[3] += 1;
+					else if (bdis < 2500 && dataR[0][i] < 500){
+						count[0] += 1;
+						break;
 					}
 				}
 			}
@@ -75,17 +79,17 @@ urg_driving::ObstacleEmergency Manage2URG_Drive::checkObstacle()
 	for (int i = 0; i < 2; i++) delete[] dataL[i];
 	for (int i = 0; i < 2; i++) delete[] dataR[i];
 
-	if (count[0] > 20 || count[3] >15){
+	if (count[0] > 20 || count[3] > 10 || count[4] > 10){
 		//停止する指令を送る
 		return urg_driving::ObstacleEmergency::DETECT;
 
 		//printf("点の数　= %d\n", count);
 	}
-	else if (count[1] > 15){
+	else if (count[1] > 10){
 		//速度を1段階下げる指令を送る
 		return urg_driving::ObstacleEmergency::SLOW1;
 	}
-	else if (count[2] > 15){
+	else if (count[2] > 10){
 		//速度を2段階下げる指令を送る
 		return urg_driving::ObstacleEmergency::SLOW2;
 	}
