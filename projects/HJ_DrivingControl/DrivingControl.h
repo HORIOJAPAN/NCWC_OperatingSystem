@@ -10,9 +10,13 @@
 
 #include "../Timer/Timer.h"
 #include "../cvPCDtest/urg_unko.h"
+#include "../HJ_ReceiveAndroidSensors/receiveAndroidSensors.h"
 
 using namespace std;
 #define PI 3.14159265359
+
+// 直進中に角度補正する閾値
+const int angleThresh = 15;
 
 void getArduinoHandle(int arduinoCOM, HANDLE& hComm, int timeoutmillisec);
 
@@ -27,6 +31,7 @@ protected:
     // シリアル送受信の結果
 	bool retLastSend;
 	bool retLastRead;
+	unsigned long lastReadBytes;
 
 public:
     // COMポートを設定してハンドルを取得
@@ -107,6 +112,11 @@ private:
 	enum Direction	{ STOP, FORWARD, BACKWARD, RIGHT, LEFT };
 	int		aimCount_L, aimCount_R;
 
+	// Android関連
+	float defaultOrientation[3];
+	float nowOrientation[3];
+	float dAzimuth; // 方位角の変位
+
 	// エンコーダからカウント数を取得して積算する
 	void getEncoderCount();
 	// Arduinoへ駆動指令を送信
@@ -125,21 +135,29 @@ private:
 	void restart(int time, Timer& timer,int encoderLRtmp[]);
 
 	Manage2URG_Drive mUrgd;
+	rcvAndroidSensors rcvDroid;
 
 public:
 	// もろもろの初期化処理
 	DrivingFollowPath(string fname, double coefficientL, double coefficientR, int arduioCOM, int ctrlrCOM);
 
+	// Manage2URG_Driveクラス関連
 	void setURGParam(int URG_COM[], float URGPOS[][4], int NumOfURG);
 	void readMapImage(string mapName);
+
+	// rcvAndroidSensorsクラス関連
+	void setAndroidCOM(int comport);
 
 	// 次の点を読み込む
 	bool getNextPoint();
 
 	// 回転角を計算
-	void	calcRotationAngle();
+	void	calcRotationAngle( int nowCoord_x = -99999 , int nowCoord_y = -99999 );
 	// 距離を計算
-	void	calcMovingDistance();
+	void	calcMovingDistance(int nowCoord_x = -99999, int nowCoord_y = -99999);
+	// 現在地を算出
+	void	calcNowCoord(int time, int nowCoord[2]);
+	void	calcNowCoord(int time);
 
 	void	run();
 	void	run_FF();

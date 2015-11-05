@@ -74,6 +74,7 @@
     <ClCompile Include="..\cvPCDtest\pcimage.cpp" />
     <ClCompile Include="..\cvPCDtest\urg_mapping.cpp" />
     <ClCompile Include="..\cvPCDtest\urg_unko.cpp" />
+    <ClCompile Include="..\HJ_ReceiveAndroidSensors\receiveAndroidSensors.cpp" />
     <ClCompile Include="..\Timer\Timer.cpp" />
     <ClCompile Include="DrivingControl.cpp" />
     <ClCompile Include="DrivingFollowPath.cpp" />

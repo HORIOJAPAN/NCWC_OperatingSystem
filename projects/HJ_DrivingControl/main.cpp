@@ -2,6 +2,7 @@
 
 const int ENCODER_COM = 10;
 const int CONTROLLER_COM = 9;
+const int ANDROID_COM = 0;
 
 void main()
 {
@@ -15,6 +16,7 @@ void main()
 	DrivingFollowPath DFP("../../data/route/rouka_migi7.rt", 24.0086517664 / 1.005, 23.751783167, ENCODER_COM, CONTROLLER_COM);
 	DFP.setURGParam(URG_COM, urgPOS, sizeof(URG_COM) / sizeof(int));
 	DFP.readMapImage("../../data/route/roukaMap.jpg");
+	DFP.setAndroidCOM(ANDROID_COM);
 	DFP.run_FF();
 
 	cout << "complete" << endl;

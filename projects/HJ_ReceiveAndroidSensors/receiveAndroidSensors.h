@@ -17,7 +17,6 @@ private:
 	HANDLE	hComm;	//シリアルポートのハンドル
 
 	// GPS系
-	bool	isGetGPS = false;
 	bool	isSaveGPSCSV = false;
 	bool	isPreparationGPSofs = false;
 	float	mLatitude , mLongitude , mAccuracy;	//	GPSから取得する緯度経度精度
@@ -26,7 +25,6 @@ private:
 	int		timeCountGPS;
 
 	// 方位角系
-	bool	isGetOrientation = false;
 	bool	isSaveOrientationCSV  = false;
 	bool	isPreparationOrientationofs = false;
 	float	mAzimuth, mPitch, mRoll;	// 姿勢
@@ -53,9 +51,15 @@ private:
 	void	PreparationOrientationCSV();
 
 public:
+	bool	isGetGPS = false;
+	bool	isGetOrientation = false;
+
 	//publicメソッド
+	rcvAndroidSensors();
 	rcvAndroidSensors( int comport );
 	~rcvAndroidSensors();
+
+	void setAndroidSensors(int comport);
 
 	// データの更新
 	void	getSensorData();

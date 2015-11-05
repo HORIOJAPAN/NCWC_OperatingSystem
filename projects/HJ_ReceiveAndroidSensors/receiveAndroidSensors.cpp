@@ -6,19 +6,28 @@ using namespace std;
 
 // 2015/10/09
 
+rcvAndroidSensors::rcvAndroidSensors() : shMem(shMemName)
+{
+	minSaveInterval = 5000;
+}
+
 rcvAndroidSensors::rcvAndroidSensors(int comport) : shMem(shMemName)
 {
-	COM = comport;
-
-	comOpen();
-
+	setAndroidSensors(comport);
 	minSaveInterval = 5000;
-
 }
+
 rcvAndroidSensors::~rcvAndroidSensors()
 {
 	comClose();
 }
+
+void rcvAndroidSensors::setAndroidSensors(int comport)
+{
+	COM = comport;
+	comOpen();
+}
+
 void rcvAndroidSensors::comOpen()
 {
 	DCB				cDcb;		// 通信設定用
@@ -284,10 +293,8 @@ void	rcvAndroidSensors::getOrientationData(float retArray[3])
 	
 	// バッファクリア
 	memset(sendbuf, 0x02, sizeof(sendbuf));
-
 	// 通信バッファクリア
 	PurgeComm(hComm, PURGE_RXCLEAR);
-
 	// 送信
 	ret = WriteFile(hComm, &sendbuf, 1, &len, NULL);
 
@@ -295,7 +302,6 @@ void	rcvAndroidSensors::getOrientationData(float retArray[3])
 	memset(readbuf, 0x00, sizeof(readbuf));
 	readlen = 11;
 	len = 0;
-
 	ret = ReadFile(hComm, readbuf, readlen, &len, NULL);
 
 	// 姿勢のデータ
@@ -314,7 +320,7 @@ void	rcvAndroidSensors::getOrientationData(float retArray[3])
 		retArray[1] = mPitch;
 		retArray[2] = mRoll;
 
-		//printf("--orientation--\n %.2f , %.2f , %.2f \n", mAzimuth, mPitch, mRoll);
+		printf("--orientation--\n %.2f , %.2f , %.2f \n", mAzimuth, mPitch, mRoll);
 
 		// 指定間隔で保存
 		if(isSaveOrientationCSV) timeCountOrientation += timerOrientation.getLapTime();

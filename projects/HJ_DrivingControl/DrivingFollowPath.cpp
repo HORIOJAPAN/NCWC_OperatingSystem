@@ -186,17 +186,28 @@ void DrivingFollowPath::sendDrivingCommand(Direction direction, int delay_int)
 }
 
 // 外積で回転角を計算
-void	DrivingFollowPath::calcRotationAngle()
+void	DrivingFollowPath::calcRotationAngle( int nowCoord_x , int nowCoord_y  )
 {
 	// 3点からベクトルを2つ用意
 	double vector1_x, vector1_y;
 	double vector2_x, vector2_y;
-	
-	vector1_x = cos(orientation);
-	vector1_y = sin(orientation);
 
-	vector2_x = x_next - x_now;
-	vector2_y = y_next - y_now;
+	if (nowCoord_x == -99999 && nowCoord_y == -99999)// 通常時
+	{
+		vector1_x = cos(orientation);
+		vector1_y = sin(orientation);
+
+		vector2_x = x_next - x_now;
+		vector2_y = y_next - y_now;
+	}
+	else
+	{
+		vector1_x = cos(orientation + dAzimuth);
+		vector1_y = sin(orientation + dAzimuth);
+
+		vector2_x = x_next - nowCoord_x;
+		vector2_y = y_next - nowCoord_y;
+	}
 
 	double absVec2 = pow(vector2_x*vector2_x + vector2_y*vector2_y, 0.5);
 	vector2_x = vector2_x / absVec2;
@@ -223,10 +234,21 @@ void	DrivingFollowPath::calcRotationAngle()
 }
 
 // 距離を計算
-void	DrivingFollowPath::calcMovingDistance()
+void	DrivingFollowPath::calcMovingDistance(int nowCoord_x, int nowCoord_y)
 {
-	double	x_disp = x_next - x_now;
-	double	y_disp = y_next - y_now;
+	double	x_disp;
+	double	y_disp;
+
+	if (nowCoord_x == -99999 && nowCoord_y == -99999)// 通常時
+	{
+		x_disp = x_next - x_now;
+		y_disp = y_next - y_now;
+	}
+	else
+	{
+		x_disp = x_next - nowCoord_x;
+		y_disp = y_next - nowCoord_y;
+	}
 
 	distance = sqrt(x_disp*x_disp + y_disp*y_disp);
 
@@ -237,6 +259,34 @@ void	DrivingFollowPath::calcMovingDistance()
 
 	//cout << "L:" << aimCount_L << ",R:" << aimCount_R << endl;
 
+}
+// 前回の指令と経過時間から現在の座標を算出
+void	DrivingFollowPath::calcNowCoord(int time, int nowCoord[2])
+{
+	double dDist;
+	switch (preDirection)
+	{
+	case FORWARD:
+		dDist = time *  (9.0 / 1000);
+		break;
+	}
+
+	nowCoord[0] = x_now + dDist * cos(orientation + dAzimuth);
+	nowCoord[1] = y_now + dDist * sin(orientation + dAzimuth);
+}
+// 前回の指令と経過時間から現在の座標を算出
+void	DrivingFollowPath::calcNowCoord(int time)
+{
+	double dDist;
+	switch (preDirection)
+	{
+	case FORWARD:
+		dDist = time *  (9.0 / 1000);
+		break;
+	}
+
+	x_now += dDist * cos(orientation + dAzimuth);
+	y_now += dDist * sin(orientation + dAzimuth);
 }
 // エンコーダのカウント数を参照して移動完了を待つ(FB時代の遺産)
 void DrivingFollowPath::waitDriveComplete()
@@ -293,7 +343,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 	{
 		cout << "非常停止してるかも" << endl;
 		DrivingControl::sendDrivingCommand(1, 0, 0, 0);
-		if (!retLastRead){
+		if (!lastReadBytes){
 			if (MessageBoxA(NULL, "もしかして非常停止してる？？\n動いてもいい？？", "もしかして！", MB_YESNO | MB_ICONSTOP) == IDYES)
 				restart(time, timer,encoderLRtmp);
 		}
@@ -304,6 +354,39 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 
 		while (mUrgd.checkObstacle());
 		restart(time, timer, encoderLRtmp);
+	}
+	// まっすぐ進んでいるかどうかのやつ
+	if (nowDirection == FORWARD)
+	{
+		rcvDroid.getOrientationData(nowOrientation);
+		dAzimuth = nowOrientation[0] - defaultOrientation[0];
+		if (abs(dAzimuth) > angleThresh)
+		{
+			if (nowDirection != STOP) sendDrivingCommand(STOP);
+
+			cout << "角度補正するなり : " << dAzimuth << "[deg]" << endl;
+			// 回転補正
+			int nowCoord[2];
+			//calcNowCoord(time, nowCoord);
+			calcNowCoord(time);
+			cout << "回転" << endl;
+			//calcRotationAngle(nowCoord[0], nowCoord[1]);
+			calcRotationAngle();
+			do{
+				if (aimCount_L > 0) sendDrivingCommand_count(RIGHT, aimCount_L);
+				else sendDrivingCommand_count(LEFT, aimCount_L);
+				waitDriveComplete_FF();
+			} while (overdelayCount);
+			Sleep(500);
+
+			rcvDroid.getOrientationData(defaultOrientation);
+			// 直進再開
+			cout << "直進" << endl;
+			//calcMovingDistance(nowCoord[0], nowCoord[1]);
+			calcMovingDistance();
+			if (aimCount_L > 0) sendDrivingCommand_count(FORWARD, aimCount_L);
+			else sendDrivingCommand_count(BACKWARD, aimCount_L);
+		}
 	}
 }
 // 移動完了まで待機する
@@ -331,8 +414,6 @@ void DrivingFollowPath::run_FF()
 
 	char z = getchar();
 
-	//mUrgd.getAroundImage();
-
 	while (getNextPoint())
 	{
 		cout << "回転" << endl;
@@ -340,20 +421,21 @@ void DrivingFollowPath::run_FF()
 		do{
 			if (aimCount_L > 0) sendDrivingCommand_count(RIGHT, aimCount_L);
 			else sendDrivingCommand_count(LEFT, aimCount_L);
-			//waitDriveComplete_FF();
+			waitDriveComplete_FF();
 		} while (overdelayCount);
-		//Sleep(500);
+		Sleep(500);
 
+		rcvDroid.getOrientationData(defaultOrientation);
 		cout << "直進" << endl;
 		calcMovingDistance();
 		do{
 			if (aimCount_L > 0) sendDrivingCommand_count(FORWARD, aimCount_L);
 			else sendDrivingCommand_count(BACKWARD, aimCount_L);
-			//waitDriveComplete_FF();
+			waitDriveComplete_FF();
 		} while (overdelayCount);
-		//Sleep(500);
+		Sleep(500);
 
-		//if(doMatching)	mUrgd.tMatching(x_next, y_next, orientation);
+		if(doMatching)	mUrgd.tMatching(x_next, y_next, orientation);
 	}
 }
 // FBで駆動を開始する(過去の遺産)
@@ -386,4 +468,8 @@ void DrivingFollowPath::setURGParam(int URG_COM[], float URGPOS[][4], int NumOfU
 void DrivingFollowPath::readMapImage(string mapName)
 {
 	mUrgd.readMapImage(mapName);
+}
+void DrivingFollowPath::setAndroidCOM(int comport)
+{
+	rcvDroid.setAndroidSensors(comport);
 }

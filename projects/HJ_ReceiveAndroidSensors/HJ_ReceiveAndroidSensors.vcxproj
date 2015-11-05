@@ -67,7 +67,7 @@
   <ItemGroup>
     <ClCompile Include="..\Timer\Timer.cpp" />
     <ClCompile Include="receiveAndroidSensors.cpp" />
-    <ClCompile Include="receive_android_sensors.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="receiveAndroidSensors.h" />

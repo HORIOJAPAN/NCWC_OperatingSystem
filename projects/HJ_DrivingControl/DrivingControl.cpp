@@ -116,12 +116,12 @@ void DrivingControl::sendDrivingCommand(int mode_int, int forward_int, int  cros
 	memset(receive_data, 0x00, sizeof(receive_data));
 	// 通信バッファクリア
 	PurgeComm(hControllerComm, PURGE_RXCLEAR);
-	len = 0;
+	lastReadBytes = 0;
 	// Arduinoからデータを受信
-	retLastRead = ReadFile(hControllerComm, &receive_data, sizeof(receive_data), &len, NULL);
+	retLastRead = ReadFile(hControllerComm, &receive_data, sizeof(receive_data), &lastReadBytes, NULL);
 
 	cout << "receive:";
-	for (int i = 0; i < len; i++)
+	for (int i = 0; i < lastReadBytes; i++)
 	{
 		cout << receive_data[i];
 	}
