@@ -111,7 +111,7 @@ private:
 
 	// Arduino‚Ö‚Ì‹ì“®Žw—ßŠÖ˜A
 	enum Direction	{ STOP, FORWARD, BACKWARD, RIGHT, LEFT };
-	int		aimCount_L, aimCount_R;
+	double		aimCount_L, aimCount_R;
 
 	// AndroidŠÖ˜A
 	float defaultOrientation[3];
