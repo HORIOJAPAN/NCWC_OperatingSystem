@@ -8,8 +8,8 @@ int sp_angle;
 
 
 void Hyoka1(float tilt, float dist, float matchRatio, float& score){
-	score = matchRatio * 100;
-	//score = (matchRatio * 100 - dist / 5 * (cos(tilt * 3.1415926 / 360) + 1));
+	// score = matchRatio * 100;
+	score = (matchRatio * 100 - dist / 5 * (cos(tilt * 3.1415926 / 360) + 1));
 }
 
 void MatchingEvaluation(
@@ -187,4 +187,5 @@ void Manage2URG_Drive::tMatching(int& pos_x, int& pos_y, double& angle){
 	angle = -sp_angle * PI / 180;
 
 	waitKey(0);
+	destroyAllWindows();
 }

@@ -297,14 +297,14 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 			if (MessageBoxA(NULL, "もしかして非常停止してる？？\n動いてもいい？？", "もしかして！", MB_YESNO | MB_ICONSTOP) == IDYES)
 				restart(time, timer,encoderLRtmp);
 		}
-	}
+	}/*
 	if (mUrgd.checkObstacle())
 	{
 		if (nowDirection != STOP) sendDrivingCommand(STOP);
 
 		while (mUrgd.checkObstacle());
 		restart(time, timer, encoderLRtmp);
-	}
+	}*/
 }
 // 移動完了まで待機する
 void DrivingFollowPath::waitDriveComplete_FF()
@@ -340,20 +340,20 @@ void DrivingFollowPath::run_FF()
 		do{
 			if (aimCount_L > 0) sendDrivingCommand_count(RIGHT, aimCount_L);
 			else sendDrivingCommand_count(LEFT, aimCount_L);
-			//waitDriveComplete_FF();
+			waitDriveComplete_FF();
 		} while (overdelayCount);
-		//Sleep(500);
+		Sleep(500);
 
 		cout << "直進" << endl;
 		calcMovingDistance();
 		do{
 			if (aimCount_L > 0) sendDrivingCommand_count(FORWARD, aimCount_L);
 			else sendDrivingCommand_count(BACKWARD, aimCount_L);
-			//waitDriveComplete_FF();
+			waitDriveComplete_FF();
 		} while (overdelayCount);
-		//Sleep(500);
+		Sleep(500);
 
-		//if(doMatching)	mUrgd.tMatching(x_next, y_next, orientation);
+		if(doMatching)	mUrgd.tMatching(x_next, y_next, orientation);
 	}
 }
 // FBで駆動を開始する(過去の遺産)
