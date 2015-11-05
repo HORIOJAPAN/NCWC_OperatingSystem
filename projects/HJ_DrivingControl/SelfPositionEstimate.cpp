@@ -9,7 +9,8 @@ int sp_angle;
 
 void Hyoka1(float tilt, float dist, float matchRatio, float& score){
 	// score = matchRatio * 100;
-	score = (matchRatio * 100 - dist / 5 * (cos(tilt * 3.1415926 / 360) + 1));
+	// score = (matchRatio * 100 - dist / 5 * (cos(tilt * 3.1415926 / 360) + 1));
+	score = 100 - pow(dist, 0.7) / matchRatio * (cos(tilt * PI / 360) + 1) / 2;
 }
 
 void MatchingEvaluation(
@@ -133,31 +134,15 @@ void spEstimate(int ideal_x, int ideal_y, float ideal_angle, Mat img1, Mat img2)
 	Mat kaitenImg;
 	Mat matrix = cv::getRotationMatrix2D(center, tempAngle, 1);
 	warpAffine(matchMap, kaitenImg, matrix, matchMap.size());
-	rectangle(fieldMap, Point(sp_x, sp_y), Point(sp_x + kaitenImg.cols, sp_y + kaitenImg.rows), Scalar(0, 0, 255), 2, 8, 0);
+	rectangle(fieldMap, Point(sp_x + kaitenImg.cols/2, sp_y + kaitenImg.rows/2), Point(sp_x + kaitenImg.cols/2, sp_y + kaitenImg.rows/2), Scalar(0, 0, 255), 2, 8, 0);
 
 	imshow("Image", fieldMap);
 	imshow("kaitenImg", kaitenImg);
 }
 
-// _MatchArea => a:1 b:2 c:3
-# define _MatchArea 1
-
 int ideal_angle = 0;
-
-# if _MatchArea == 1
-int		ideal_x = 175;
-int		ideal_y = 403;
-# elif _MatchArea == 2
-int		ideal_x = 374;
-int		ideal_y = 423;
-# elif _MatchArea == 3
-int		ideal_x = 611;
-int		ideal_y = 458;
-# else
-int		ideal_x = _FieldHeight / 2;
-int		ideal_y = _FieldWidth / 2;
-# endif
-
+int	ideal_x;
+int	ideal_y;
 
 void Manage2URG_Drive::tMatching(int& pos_x, int& pos_y, double& angle){
 	clock_t start = clock();
