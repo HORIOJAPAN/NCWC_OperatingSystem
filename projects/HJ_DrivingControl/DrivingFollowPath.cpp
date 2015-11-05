@@ -393,7 +393,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 	}*/
 
 	// Ç‹Ç¡Ç∑ÇÆêiÇÒÇ≈Ç¢ÇÈÇ©Ç«Ç§Ç©ÇÃÇ‚Ç¬
-	if (nowDirection == FORWARD)
+	if (nowDirection == FORWARD && false)
 	{
 		rcvDroid.getOrientationData(nowOrientation);
 		dAzimuth = nowOrientation[0] - defaultOrientation[0];
@@ -454,7 +454,7 @@ void DrivingFollowPath::run_FF()
 	getEncoderCount();
 
 	char z = getchar();
-
+	mUrgd.getAroundImage();
 	while (getNextPoint())
 	{
 		cout << "âÒì]" << endl;
@@ -476,7 +476,7 @@ void DrivingFollowPath::run_FF()
 		} while (overdelayCount);
 		Sleep(500);
 
-		//if(doMatching)	mUrgd.tMatching(x_next, y_next, orientation , mapNum - 1 );
+		if(doMatching)	mUrgd.tMatching(x_next, y_next, orientation , mapNum - 1 );
 	}
 }
 // FBÇ≈ãÏìÆÇäJénÇ∑ÇÈ(âﬂãéÇÃà‚éY)
