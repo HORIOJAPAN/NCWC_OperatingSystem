@@ -147,7 +147,7 @@ int	ideal_x;
 int	ideal_y;
 
 
-void Manage2URG_Drive::tMatching(int& pos_x, int& pos_y, double& angle){
+void Manage2URG_Drive::tMatching(int& pos_x, int& pos_y, double& angle,int mapNum){
 	clock_t start = clock();
 
 	sp_x = ideal_x = pos_x;
@@ -156,10 +156,10 @@ void Manage2URG_Drive::tMatching(int& pos_x, int& pos_y, double& angle){
 
 	this->getAroundImage();
 
-	spEstimate(sp_x, sp_y, sp_angle, tmMap, tmTemplate);
+	spEstimate(sp_x, sp_y, sp_angle, tmMap[mapNum], tmTemplate);
 
 	// ↓これの結果とsp_angleがマッチング結果の座標と角度の絶対値(フィールド画像の座標系)
-
+	
 	sp_x += ideal_x - (fieldSquareSize - matchSquareSize) / 2;
 	sp_y += ideal_y - (fieldSquareSize - matchSquareSize) / 2;
 	/*

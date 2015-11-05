@@ -3,7 +3,6 @@
 // URGのパラメータをセットする
 void Manage2URG_Drive::setURGParam(int URG_COM[], float URGPOS[][4], int NumOfURG)
 {
-	urgdArray = new urg_driving[NumOfURG];
 	for (int i = 0; i < NumOfURG; i++)
 	{
 		urgdArray[i].init(URG_COM[i], URGPOS[i]);
@@ -12,8 +11,6 @@ void Manage2URG_Drive::setURGParam(int URG_COM[], float URGPOS[][4], int NumOfUR
 // デストラクタで配列の解放
 Manage2URG_Drive::~Manage2URG_Drive()
 {
-	delete[] urgdArray;
-	urgdArray = NULL;
 }
 
 // 左右のURGで障害物(仮)を検出した結果を総合して障害物の判断をする
@@ -61,7 +58,7 @@ urg_driving::ObstacleEmergency Manage2URG_Drive::checkObstacle()
 					adis = pow((dataR[0][i] - dataL[0][j]), 2) + pow((dataR[1][i] - (dataL[1][j] + 280)), 2);
 					if (adis < bdis){
 						bdis = adis;
-						}
+					}
 					if (bdis < 2500 && 600 < dataR[0][i]){
 						count[1] += 1;
 						break;
@@ -125,8 +122,8 @@ void Manage2URG_Drive::getAroundImage(int width, int height, int resolution, int
 
 void Manage2URG_Drive::readMapImage(string mapName)
 {
-	tmMap = cv::imread(mapName);
-	if (tmMap.empty())
+	tmMap.push_back(cv::imread(mapName));
+	if (tmMap.back().empty())
 	{
 		cout << "False read Map image" << endl;
 		int z = getchar();

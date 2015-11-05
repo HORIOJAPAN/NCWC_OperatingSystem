@@ -7,6 +7,7 @@
 #include <sstream>
 #include <iomanip>
 #include <Windows.h>
+#include <stdarg.h>
 
 #include "../Timer/Timer.h"
 #include "../cvPCDtest/urg_unko.h"
@@ -56,20 +57,20 @@ public:
 class Manage2URG_Drive
 {
 private:
-	urg_driving* urgdArray  = NULL;
-	cv::Mat tmMap;
+	urg_driving urgdArray[2];
+	vector<cv::Mat> tmMap;
 	cv::Mat tmTemplate;
 public:
 	~Manage2URG_Drive();
 
 	void setURGParam(int URG_COM[], float URGPOS[][4], int NumOfURG);
-	void readMapImage(string mapName );
+	void readMapImage(string mapName);
 	
     urg_driving::ObstacleEmergency checkObstacle();
 
 	void getAroundImage(int width = 300 , int height = 300 , int resolution = 5 ,int measurementTimes = 10);
 
-	void tMatching(int& pos_x , int& pos_y , double& angle);
+	void tMatching(int& pos_x , int& pos_y , double& angle , int mapNum);
 };
 
 // 経路データを読み込んで駆動指令を行うやつ
@@ -81,7 +82,7 @@ private:
 	const string	fileName;			// 経路ファイル名
 	const string	searchWord = ",";	// データの区切り識別用の","
 	ifstream	ifs;					// ファイルストリーム
-	string	str, x_str, y_str , data_str;		// データ読み取りに使用する変数
+	string	str, x_str, y_str , match_str , map_str;		// データ読み取りに使用する変数
 	string::size_type	begin, end;
 
 	// ベクトルを2つ使用する為3点保存する
@@ -90,6 +91,7 @@ private:
 	int	x_next = 0, y_next = 0;			// 次の座標
 
 	int doMatching;
+	int mapNum;
     
 	// 駆動指令計算用変数
 	double	orientation;			// 現在向いている方位角(スタート直後を0として右向きが正)
@@ -145,6 +147,7 @@ public:
 	// Manage2URG_Driveクラス関連
 	void setURGParam(int URG_COM[], float URGPOS[][4], int NumOfURG);
 	void readMapImage(string mapName);
+	void readMapImage(int num, ...);
 
 	// rcvAndroidSensorsクラス関連
 	void setAndroidCOM(int comport);

@@ -61,11 +61,18 @@ bool DrivingFollowPath::getNextPoint()
 	begin = end;
 	end = str.find(searchWord, begin + 1);
 	if (end != string::npos){
-		data_str = str.substr(begin + 1, end - begin + 1);
-		doMatching = stoi(data_str);
+		match_str = str.substr(begin + 1, end - begin + 1);
+		doMatching = stoi(match_str);
 	}
 
-	cout << "X:" << x_next << ",Y:" << y_next << ",Matching" << doMatching << endl;
+	begin = end;
+	end = str.find(searchWord, begin + 1);
+	if (end != string::npos){
+		map_str = str.substr(begin + 1, end - begin + 1);
+		mapNum = stoi(map_str);
+	}
+
+	cout << "X:" << x_next << ",Y:" << y_next << ",Matching" << doMatching << ",MapNum" << mapNum << endl;
 
 	return true;
 }
@@ -259,9 +266,6 @@ double	DrivingFollowPath::calcMovingDistance(int nowCoord_x, int nowCoord_y)
 	}
 
 	return sqrt(x_disp*x_disp + y_disp*y_disp) * 50;//[mm]
-
-	
-
 }
 void	DrivingFollowPath::sendStraight(double distance)
 {
@@ -472,7 +476,7 @@ void DrivingFollowPath::run_FF()
 		} while (overdelayCount);
 		Sleep(500);
 
-		//if(doMatching)	mUrgd.tMatching(x_next, y_next, orientation);
+		//if(doMatching)	mUrgd.tMatching(x_next, y_next, orientation , mapNum - 1 );
 	}
 }
 // FB‚Å‹ì“®‚ðŠJŽn‚·‚é(‰ß‹Ž‚ÌˆâŽY)
@@ -505,6 +509,16 @@ void DrivingFollowPath::setURGParam(int URG_COM[], float URGPOS[][4], int NumOfU
 void DrivingFollowPath::readMapImage(string mapName)
 {
 	mUrgd.readMapImage(mapName);
+}
+void DrivingFollowPath::readMapImage(int num, ...)
+{
+	va_list args;
+	va_start(args, num);
+	for (int i = 0 ; i < num; i++)
+	{
+		mUrgd.readMapImage(va_arg(args,string));
+	}
+	va_end(args);
 }
 void DrivingFollowPath::setAndroidCOM(int comport)
 {
