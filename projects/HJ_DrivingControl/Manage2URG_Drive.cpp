@@ -66,7 +66,7 @@ urg_driving::ObstacleEmergency Manage2URG_Drive::checkObstacle()
 						count[1] += 1;
 						break;
 					}
-					else if (bdis < 2500 && 300 < dataR[0][i] && dataR[0][i] < 600){
+					else if (bdis < 2500 && 500 < dataR[0][i] && dataR[0][i] < 600){
 						count[2] += 1;
 						break;
 					}
