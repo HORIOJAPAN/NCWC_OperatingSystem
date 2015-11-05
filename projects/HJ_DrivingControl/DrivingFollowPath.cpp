@@ -361,6 +361,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 		dAzimuth = nowOrientation[0] - defaultOrientation[0];
 		if (abs(dAzimuth) > angleThresh)
 		{
+			dAzimuth *= PI / 180;
 			if (nowDirection != STOP) sendDrivingCommand(STOP);
 
 			cout << "角度補正するなり : " << dAzimuth << "[deg]" << endl;
@@ -382,7 +383,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 			// 直進再開
 			cout << "直進" << endl;
 			//calcMovingDistance(nowCoord[0], nowCoord[1]);
-			this->calcMovingDistance();
+			calcMovingDistance();
 			if (aimCount_L > 0) sendDrivingCommand_count(FORWARD, aimCount_L);
 			else sendDrivingCommand_count(BACKWARD, aimCount_L);
 		}
@@ -435,7 +436,7 @@ void DrivingFollowPath::run_FF()
 		} while (overdelayCount);
 		Sleep(500);
 
-		if(doMatching)	mUrgd.tMatching(x_next, y_next, orientation);
+		//if(doMatching)	mUrgd.tMatching(x_next, y_next, orientation);
 	}
 }
 // FBで駆動を開始する(過去の遺産)
