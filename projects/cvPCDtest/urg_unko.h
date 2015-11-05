@@ -5,13 +5,13 @@
 #include "urg_utils.h"
 #include "urg_open.h"
 #include "pcimage.h"
-#include "../SharedMemoryTESTpp/SharedMemory.h"
 
 #include <Windows.h>
 #include <fstream>
 #include <opencv2/opencv.hpp>
 #include <opencv2/opencv_lib.hpp>
 
+using namespace std;
 
 #define DEBUG_WRITELINE
 
@@ -85,9 +85,6 @@ protected:
 	float distance = 0.0, distance_old = 0.0;
 	float radian = 0.0;
 
-	SharedMemory<int> shMem;
-	enum {EMARGENCY};
-
 	float* pointpos[2];
 	int data_n;
 
@@ -112,7 +109,7 @@ public:
 	//コンストラクタ
 	urg_unko();
 	//デストラクタ
-	~urg_unko();
+	virtual ~urg_unko();
 
 	//自身の初期化処理を行う
 	void init(int COM, float pos[]);

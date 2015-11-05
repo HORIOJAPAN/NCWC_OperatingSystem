@@ -14,13 +14,9 @@ using namespace std;
 *	返り値:
 *		なし
 */
-// urg_unkoを配列で宣言したときに引数を渡せないのでpcimageの引数はとりあえずグローバル変数から受け取る
-urg_unko::urg_unko() //:pcimage(::imgWidth, ::imgHeight, ::imgResolution)
-	:shMem(SharedMemory<int>("unko"))
+urg_unko::urg_unko() 
 {
 	COMport = 0;
-
-	shMem.reset();
 }
 
 /*
@@ -62,8 +58,9 @@ void urg_unko::init(int COM, float pos[])
 int urg_unko::disconnectURG(){
 
 	//切断
-	//free(data);
-	//urg_close(&urg);
+	delete data;
+	urg_close(&urg);
+	data = NULL;
 
 	printf("URG disconnected \n");
 	return 0;
@@ -101,7 +98,8 @@ int urg_unko::connectURG(){
 	}
 
 	//データ取得用のメモリを確保
-	data = (long *)malloc(urg_max_data_size(&urg) * sizeof(data[0]));
+	//data = (long *)malloc(urg_max_data_size(&urg) * sizeof(data[0]));
+	data = new long[urg_max_data_size(&urg)];
 	if (!data) {
 		perror("urg_max_index()");
 		return 1;
@@ -142,7 +140,8 @@ int urg_unko::getData4URG(float dist,float old, float rad){
 		data_n = urg_get_distance(&urg, data, &time_stamp);
 		if (data_n <= 0) {
 			printf("urg_get_distance: %s\n", urg_error(&urg));
-			free(data);
+			delete data;
+			data = NULL;
 			urg_close(&urg);
 			return 1;
 		}

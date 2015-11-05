@@ -191,40 +191,22 @@ void	DrivingFollowPath::calcRotationAngle()
 	// 3“_‚©‚çƒxƒNƒgƒ‹‚ð2‚Â—pˆÓ
 	double vector1_x, vector1_y;
 	double vector2_x, vector2_y;
-
-	vector1_x = x_now - x_old;
-	vector1_y = y_now - y_old;
-
+	
 	vector1_x = cos(orientation);
 	vector1_y = sin(orientation);
-
-	vector1_x = 1;
-	vector1_y = 0;
 
 	vector2_x = x_next - x_now;
 	vector2_y = y_next - y_now;
 
-	double vector2_x_rotate = vector2_x * cos(-orientation) - vector2_y * sin(-orientation);
-	double vector2_y_rotate = vector2_x * sin(-orientation) + vector2_y * cos(-orientation);
-
+	double absVec2 = pow(vector2_x*vector2_x + vector2_y*vector2_y, 0.5);
+	vector2_x = vector2_x / absVec2;
+	vector2_y = vector2_y / absVec2;
 
 	// a~b‚Æ|a|,|b|‚ðŽZo‚µ‚Äarcsin‚Å‰ñ“]Šp‚ðŽZo
-	/*
 	double det = vector1_x * vector2_y - vector1_y * vector2_x;
-	double d1 = pow((double)(vector1_x*vector1_x + vector1_y*vector1_y), 0.5);
-	double d2 = pow((double)(vector2_x*vector2_x + vector2_y*vector2_y), 0.5);
-	radian = asin((double)det / (d1*d2));
-	double inner = vector1_x * vector1_y + vector2_y * vector2_x;
-	radian = atan2(det, inner);*/
-
-	
-	double det = vector1_x * vector2_y_rotate - vector1_y * vector2_x_rotate;
-	double d1 = pow((double)(vector1_x*vector1_x + vector1_y*vector1_y), 0.5);
-	double d2 = pow((double)(vector2_x_rotate*vector2_x_rotate + vector2_y_rotate*vector2_y_rotate), 0.5);
-	radian = asin((double)det / (d1*d2));
-
-	//double inner = vector1_x * vector1_y + vector2_y_rotate * vector2_x_rotate;
-	//radian = atan2(det, inner);
+	radian = asin(det);
+	double inner = vector1_x * vector2_x + vector1_y * vector2_y;
+	radian = atan2(det, inner);
 
 	orientation += radian;
 
@@ -358,20 +340,20 @@ void DrivingFollowPath::run_FF()
 		do{
 			if (aimCount_L > 0) sendDrivingCommand_count(RIGHT, aimCount_L);
 			else sendDrivingCommand_count(LEFT, aimCount_L);
-			waitDriveComplete_FF();
+			//waitDriveComplete_FF();
 		} while (overdelayCount);
-		Sleep(500);
+		//Sleep(500);
 
 		cout << "’¼i" << endl;
 		calcMovingDistance();
 		do{
 			if (aimCount_L > 0) sendDrivingCommand_count(FORWARD, aimCount_L);
 			else sendDrivingCommand_count(BACKWARD, aimCount_L);
-			waitDriveComplete_FF();
+			//waitDriveComplete_FF();
 		} while (overdelayCount);
-		Sleep(500);
+		//Sleep(500);
 
-		if(doMatching)	mUrgd.tMatching(x_next, y_next, orientation);
+		//if(doMatching)	mUrgd.tMatching(x_next, y_next, orientation);
 	}
 }
 // FB‚Å‹ì“®‚ðŠJŽn‚·‚é(‰ß‹Ž‚ÌˆâŽY)

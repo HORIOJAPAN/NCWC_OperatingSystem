@@ -13,6 +13,7 @@ void Manage2URG_Drive::setURGParam(int URG_COM[], float URGPOS[][4], int NumOfUR
 Manage2URG_Drive::~Manage2URG_Drive()
 {
 	delete[] urgdArray;
+	urgdArray = NULL;
 }
 
 // ¶‰E‚ÌURG‚ÅáŠQ•¨(‰¼)‚ğŒŸo‚µ‚½Œ‹‰Ê‚ğ‘‡‚µ‚ÄáŠQ•¨‚Ì”»’f‚ğ‚·‚é

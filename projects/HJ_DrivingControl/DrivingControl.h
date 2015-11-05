@@ -9,7 +9,6 @@
 #include <Windows.h>
 
 #include "../Timer/Timer.h"
-#include "../SharedMemoryTESTpp/SharedMemory.h"
 #include "../cvPCDtest/urg_unko.h"
 
 using namespace std;
@@ -51,7 +50,7 @@ public:
 class Manage2URG_Drive
 {
 private:
-	urg_driving* urgdArray;
+	urg_driving* urgdArray  = NULL;
 	cv::Mat tmMap;
 	cv::Mat tmTemplate;
 public:
