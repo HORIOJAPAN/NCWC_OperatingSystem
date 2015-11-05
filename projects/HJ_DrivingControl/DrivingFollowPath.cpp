@@ -352,7 +352,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 	if (time * abs(aimCount_L) > abs(leftCount) * waittime)     left = true;
 	if (time * abs(aimCount_R) > abs(rightCount) * waittime)    right = true;
 
-	if (left || right&& nowDirection != STOP)
+	/*if (left || right&& nowDirection != STOP)
 	{
 		cout << "非常停止してるかも" << endl;
 		DrivingControl::sendDrivingCommand(1, 0, 0, 0);
@@ -360,7 +360,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 			if (MessageBoxA(NULL, "もしかして非常停止してる？？\n動いてもいい？？", "もしかして！", MB_YESNO | MB_ICONSTOP) == IDYES)
 				restart(time, timer,encoderLRtmp);
 		}
-	}/*
+	}*/
 	if (urg_driving::ObstacleEmergency emergency = mUrgd.checkObstacle())
 	{
 		if (nowDirection != STOP && nowDirection != FORWARD_SLOW ) sendDrivingCommand(STOP);
@@ -386,7 +386,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 	{
 		sendDrivingCommand(FORWARD, (waittime - time) * 5.4 / 9.0);
 		timer.getLapTime();
-	}*/
+	}
 
 	// まっすぐ進んでいるかどうかのやつ
 	if (nowDirection == FORWARD && false)
