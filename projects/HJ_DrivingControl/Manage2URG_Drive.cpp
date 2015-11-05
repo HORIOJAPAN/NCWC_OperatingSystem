@@ -51,6 +51,7 @@ urg_driving::ObstacleEmergency Manage2URG_Drive::checkObstacle()
 		if (dataR[0][i] < 0 && dataR[1][i] < 0){
 			count[0] += 1;
 			break;
+
 		}else{
 			for (int j = 0; j < dataL[0][0]; j++){
 				if (dataL[0][j] < 0 && dataL[1][j] > 0){
