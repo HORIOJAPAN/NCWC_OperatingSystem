@@ -191,14 +191,14 @@ void	DrivingFollowPath::calcRotationAngle( int nowCoord_x , int nowCoord_y  )
 	// 3点からベクトルを2つ用意
 	double vector1_x, vector1_y;
 	double vector2_x, vector2_y;
-
+	
 	if (nowCoord_x == -99999 && nowCoord_y == -99999)// 通常時
 	{
-		vector1_x = cos(orientation);
-		vector1_y = sin(orientation);
+	vector1_x = cos(orientation);
+	vector1_y = sin(orientation);
 
-		vector2_x = x_next - x_now;
-		vector2_y = y_next - y_now;
+	vector2_x = x_next - x_now;
+	vector2_y = y_next - y_now;
 	}
 	else
 	{
@@ -347,13 +347,14 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 			if (MessageBoxA(NULL, "もしかして非常停止してる？？\n動いてもいい？？", "もしかして！", MB_YESNO | MB_ICONSTOP) == IDYES)
 				restart(time, timer,encoderLRtmp);
 		}
-	}
+	}/*
 	if (mUrgd.checkObstacle())
 	{
 		if (nowDirection != STOP) sendDrivingCommand(STOP);
 
 		while (mUrgd.checkObstacle());
 		restart(time, timer, encoderLRtmp);
+	}*/
 	}
 	// まっすぐ進んでいるかどうかのやつ
 	if (nowDirection == FORWARD)

@@ -13,7 +13,7 @@ void main()
 	float urgPOS[][4] = { 20.0, 350.0, -265.0, 0.5236,
 		20.0, 350.0, 260.0, -0.5236 };
 
-	DrivingFollowPath DFP("../../data/route/rouka_migi7.rt", 24.0086517664 / 1.005, 23.751783167, ENCODER_COM, CONTROLLER_COM);
+	DrivingFollowPath DFP("../../data/route/gakunaitest1.rt", 24.0086517664 / 1.005, 23.751783167, ENCODER_COM, CONTROLLER_COM);
 	DFP.setURGParam(URG_COM, urgPOS, sizeof(URG_COM) / sizeof(int));
 	DFP.readMapImage("../../data/route/roukaMap.jpg");
 	DFP.setAndroidCOM(ANDROID_COM);
