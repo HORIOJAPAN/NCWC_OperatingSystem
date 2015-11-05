@@ -1,5 +1,4 @@
 #include "DrivingControl.h"
-
 /*
 * コンストラクタ
 * 経路ファイルを読み込んでヘッダをとばす
@@ -355,7 +354,6 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 		while (mUrgd.checkObstacle());
 		restart(time, timer, encoderLRtmp);
 	}*/
-	}
 	// まっすぐ進んでいるかどうかのやつ
 	if (nowDirection == FORWARD)
 	{
@@ -384,12 +382,13 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 			// 直進再開
 			cout << "直進" << endl;
 			//calcMovingDistance(nowCoord[0], nowCoord[1]);
-			calcMovingDistance();
+			this->calcMovingDistance();
 			if (aimCount_L > 0) sendDrivingCommand_count(FORWARD, aimCount_L);
 			else sendDrivingCommand_count(BACKWARD, aimCount_L);
 		}
 	}
 }
+
 // 移動完了まで待機する
 void DrivingFollowPath::waitDriveComplete_FF()
 {

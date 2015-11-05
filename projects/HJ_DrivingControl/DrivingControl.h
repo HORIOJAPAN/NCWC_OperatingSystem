@@ -13,6 +13,7 @@
 #include "../HJ_ReceiveAndroidSensors/receiveAndroidSensors.h"
 
 using namespace std;
+
 #define PI 3.14159265359
 
 // ’Όi’†‚Ιp“x•β³‚·‚ιθ‡’l
