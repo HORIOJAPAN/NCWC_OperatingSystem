@@ -105,7 +105,11 @@ void DrivingFollowPath::getEncoderCount()
 	}
 
 	leftCount += (signed char)receive_data[0];
+	totalLeftCount += (signed char)receive_data[0];
+
 	rightCount += (signed char)receive_data[1];
+	totalRightCount += (signed char)receive_data[1];
+
 	//cout << "L:" << leftCount << ",R:" << rightCount << endl;
 }
 
@@ -305,6 +309,21 @@ void	DrivingFollowPath::calcNowCoord(int time)
 	x_now += dDist * cos(orientation + dAzimuth);
 	y_now += dDist * sin(orientation + dAzimuth);
 }
+
+void DrivingFollowPath::checkCurrentAzimuth()
+{
+	rcvDroid.getOrientationData(nowOrientation);
+	float dAzimuth_droid = nowOrientation[0] - defaultOrientation[0];
+	float dAzimuth_encoder = encoderOutlier ? dAzimuth_droid :
+		(leftCount * leftCoefficient - rightCount * rightCoefficient) / (wheelDistance * 2);
+
+	if (abs(dAzimuth_droid) > angleThresh && abs(dAzimuth_encoder) > angleThresh)
+	{
+		dAzimuth = dAzimuth_droid;
+	}
+	else dAzimuth = 0;
+}
+
 // エンコーダのカウント数を参照して移動完了を待つ(FB時代の遺産)
 void DrivingFollowPath::waitDriveComplete()
 {
@@ -359,12 +378,14 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 	if(left || right&& nowDirection != STOP)
 	{
 		cout << "非常停止してるかも" << endl;
+		encoderOutlier = true;
 		DrivingControl::sendDrivingCommand(1, 0, 0, 0);
 		if (!lastReadBytes){
 			if (MessageBoxA(NULL, "もしかして非常停止してる？？\n動いてもいい？？", "もしかして！", MB_YESNO | MB_ICONSTOP) == IDYES)
 				restart(time, timer,encoderLRtmp);
 		}
 	}
+	else if (encoderOutlier) encoderOutlier = false;
 	
 	if (urg_driving::ObstacleEmergency emergency = mUrgd.checkObstacle())
 	{

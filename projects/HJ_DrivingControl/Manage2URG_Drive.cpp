@@ -123,9 +123,9 @@ void Manage2URG_Drive::getAroundImage(int width, int height, int resolution, int
 void Manage2URG_Drive::readMapImage(string mapName)
 {
 	tmMap.push_back(cv::imread(mapName,0));
-	//if (tmMap.back().empty())
-	//{
-		//cout << "False read Map image" << endl;
-		//int z = getchar();
-	//}
+	if (false&&tmMap.back().empty())
+	{
+		cout << "False read Map image" << endl;
+		int z = getchar();
+	}
 }

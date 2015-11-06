@@ -110,6 +110,7 @@ private:
 	HANDLE	hEncoderComm;
 	bool	isEncoderInitialized = false;
 	int		leftCount, rightCount;
+	long	totalLeftCount, totalRightCount;
 
 	// Arduinoへの駆動指令関連
 	enum Direction	{ STOP, FORWARD , FORWARD_SLOW , BACKWARD, RIGHT, LEFT };
@@ -133,6 +134,7 @@ private:
 	int overdelayCount;
 	Direction preDirection;
 	Direction nowDirection;
+	bool encoderOutlier = false;
 
 	void checkEmergencyStop(Timer& timer);
 	void restart(int time, Timer& timer,int encoderLRtmp[]);
@@ -164,6 +166,9 @@ public:
 	// 現在地を算出
 	void	calcNowCoord(int time, int nowCoord[2]);
 	void	calcNowCoord(int time);
+
+	// 現在の姿勢(方位角)の基準値からのズレを算出
+	void	checkCurrentAzimuth();
 
 	void	run();
 	void	run_FF();
