@@ -368,8 +368,6 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 	
 	if (urg_driving::ObstacleEmergency emergency = mUrgd.checkObstacle())
 	{
-		//if (nowDirection != STOP && nowDirection != FORWARD_SLOW ) sendDrivingCommand(STOP);
-
 		switch (emergency)
 		{
 		case urg_driving::ObstacleEmergency::DETECT:
@@ -383,7 +381,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 		case urg_driving::ObstacleEmergency::SLOW2:
 			if (nowDirection == FORWARD_SLOW) break;
 			cout << "SLOW" << endl;
-			if (nowDirection != STOP && nowDirection != FORWARD_SLOW) sendDrivingCommand(STOP);
+			if (nowDirection != STOP) sendDrivingCommand(STOP);
 			sendDrivingCommand(FORWARD_SLOW, (waittime - time) * 9.0 / 5.4);
 			timer.getLapTime();
 			break;

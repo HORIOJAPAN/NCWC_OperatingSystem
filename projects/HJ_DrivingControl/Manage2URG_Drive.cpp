@@ -69,11 +69,13 @@ urg_driving::ObstacleEmergency Manage2URG_Drive::checkObstacle()
 						break;
 					}
 				}
-				else if (dataL[0][j] < 0 && dataL[1][j] > 0){
-					count[4] += 1;
-					break;
-				}
 			}
+		}
+	}
+
+	for (int k = 0; k < dataL[0][0]; k++){
+		if (dataL[0][k] < 0 && dataL[1][k] > 0){
+			count[4] += 1;
 		}
 	}
 
