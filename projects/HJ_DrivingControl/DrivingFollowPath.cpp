@@ -25,7 +25,7 @@ DrivingFollowPath::DrivingFollowPath(string fname, double coefficientL, double c
 	x_now = x_next - 5;
 	y_now = y_next;
 
-	getArduinoHandle(encoderCOM, hEncoderComm, 0);
+	getArduinoHandle(encoderCOM, hEncoderComm, 500);
 	setControllerCOM(controllerCOM);
 
 }
@@ -365,14 +365,16 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 				restart(time, timer,encoderLRtmp);
 		}
 	}
-	/*if (urg_driving::ObstacleEmergency emergency = mUrgd.checkObstacle())
+	
+	if (urg_driving::ObstacleEmergency emergency = mUrgd.checkObstacle())
 	{
-		if (nowDirection != STOP && nowDirection != FORWARD_SLOW ) sendDrivingCommand(STOP);
+		//if (nowDirection != STOP && nowDirection != FORWARD_SLOW ) sendDrivingCommand(STOP);
 
 		switch (emergency)
 		{
 		case urg_driving::ObstacleEmergency::DETECT:
 			cout << "DETECT" << endl;
+			sendDrivingCommand(STOP);
 			while (mUrgd.checkObstacle());
 			restart(time, timer, encoderLRtmp);
 			break;
@@ -381,6 +383,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 		case urg_driving::ObstacleEmergency::SLOW2:
 			if (nowDirection == FORWARD_SLOW) break;
 			cout << "SLOW" << endl;
+			if (nowDirection != STOP && nowDirection != FORWARD_SLOW) sendDrivingCommand(STOP);
 			sendDrivingCommand(FORWARD_SLOW, (waittime - time) * 9.0 / 5.4);
 			timer.getLapTime();
 			break;
@@ -390,7 +393,8 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 	{
 		sendDrivingCommand(FORWARD, (waittime - time) * 5.4 / 9.0);
 		timer.getLapTime();
-	}*/
+	}
+	
 
 	// ‚Ü‚Á‚·‚®i‚ñ‚Å‚¢‚é‚©‚Ç‚¤‚©‚Ì‚â‚Â
 	if (nowDirection == FORWARD && false)
@@ -454,7 +458,7 @@ void DrivingFollowPath::run_FF()
 	getEncoderCount();
 
 	char z = getchar();
-	mUrgd.getAroundImage();
+	//mUrgd.getAroundImage();
 	while (getNextPoint())
 	{
 		cout << "‰ñ“]" << endl;

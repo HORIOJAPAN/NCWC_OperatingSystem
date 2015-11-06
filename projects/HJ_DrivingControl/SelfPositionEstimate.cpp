@@ -79,7 +79,7 @@ void MatchingEvaluation(
 	angle_center = sp_angle;
 }
 
-# define fieldSquareSize 500		// トリミング後、フィールド画像の縦横フル長さ
+# define fieldSquareSize 600		// トリミング後、フィールド画像の縦横フル長さ
 # define matchSquareSize 200		// トリミング後、マッチ画像の縦横フル長さ
 
 # define kakudoHaba1 36		// 1回目角度幅（片方向）
@@ -175,5 +175,5 @@ void Manage2URG_Drive::tMatching(int& pos_x, int& pos_y, double& angle,int mapNu
 	angle = -sp_angle * PI / 180;
 
 	waitKey(0);
-	destroyAllWindows();
+	//destroyAllWindows();
 }

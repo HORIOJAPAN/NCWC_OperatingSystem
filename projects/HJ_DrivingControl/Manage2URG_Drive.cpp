@@ -101,7 +101,7 @@ urg_driving::ObstacleEmergency Manage2URG_Drive::checkObstacle()
 // ’â~‚µ‚½ó‘Ô‚Åü•Ó‚Ì‰æ‘œ‚ğì¬‚·‚é‚â‚Â(TM—p)
 void Manage2URG_Drive::getAroundImage(int width, int height, int resolution, int measurementTimes)
 {
-	PCImage::isColor = true;
+	PCImage::isColor = false;
 	urg_driving::initPCImage(width, height, resolution);
 	urg_driving::setPCImageOrigin(width / 2, height / 2);
 
@@ -122,7 +122,7 @@ void Manage2URG_Drive::getAroundImage(int width, int height, int resolution, int
 
 void Manage2URG_Drive::readMapImage(string mapName)
 {
-	tmMap.push_back(cv::imread(mapName));
+	tmMap.push_back(cv::imread(mapName,0));
 	//if (tmMap.back().empty())
 	//{
 		//cout << "False read Map image" << endl;
