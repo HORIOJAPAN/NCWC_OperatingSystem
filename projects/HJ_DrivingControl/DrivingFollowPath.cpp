@@ -375,7 +375,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 		case urg_driving::ObstacleEmergency::DETECT:
 			cout << "DETECT" << endl;
 			sendDrivingCommand(STOP);
-			while (mUrgd.checkObstacle());
+			while (mUrgd.checkObstacle() == urg_driving::ObstacleEmergency::DETECT);
 			restart(time, timer, encoderLRtmp);
 			break;
 
