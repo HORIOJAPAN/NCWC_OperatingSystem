@@ -11,7 +11,7 @@ void Hyoka1(float tilt, float dist, float matchRatio, float& score){
 	// score = matchRatio * 100;
 	// score = (matchRatio * 100 - dist / 5 * (cos(tilt * 3.1415926 / 360) + 1));
 	// score = (matchRatio * 100 - dist / 5 * (cos(tilt * 3.1415926 / 360) + 1));
-	score = 100 - pow(dist, 0.7) / matchRatio * (cos(tilt * PI / 360) + 1) / 2;
+	score = 100 - pow(dist, 0.7) / matchRatio * powf((cos(tilt * PI / 360) + 1) / 2,2);
 }
 
 void MatchingEvaluation(
@@ -58,14 +58,16 @@ void MatchingEvaluation(
 			for (float j = 0; j < match.rows; j++)
 			{
 				distance = sqrt((k - ideal_x)*(k - ideal_x) + (j - ideal_y)*(j - ideal_y));
-				Hyoka1((angle - angle_base), distance, match.at<float>(j, k), Evaluation1);
+				if (match.at<float>(j, k) > 0.1){
+					Hyoka1((angle - angle_base), distance, match.at<float>(j, k), Evaluation1);
 
-				if (Evaluation1 > maxEvaluation){
-					maxEvaluation0 = match.at<float>(j, k);
-					maxAngle = angle;
-					Pt = Point(k, j);
-					maxDistance = distance;
-					maxEvaluation = Evaluation1;
+					if (Evaluation1 > maxEvaluation){
+						maxEvaluation0 = match.at<float>(j, k);
+						maxAngle = angle;
+						Pt = Point(k, j);
+						maxDistance = distance;
+						maxEvaluation = Evaluation1;
+					}
 				}
 			}
 		}

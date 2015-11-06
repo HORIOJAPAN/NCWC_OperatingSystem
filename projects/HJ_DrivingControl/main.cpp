@@ -1,13 +1,13 @@
 #include "DrivingControl.h"
 
-const int ENCODER_COM = 10;
-const int CONTROLLER_COM = 9;
-const int ANDROID_COM = 29;
+const int ENCODER_COM = 9;
+const int CONTROLLER_COM = 4;
+const int ANDROID_COM = 1;
 
 void main()
 {
 	//URGのCOMポートを指定
-	int URG_COM[] = { 6, 27 };
+	int URG_COM[] = { 23, 24 };
 
 	//URGの位置を指定
 	float urgPOS[][4] = { 20.0, 350.0, -265.0, 0.5236,

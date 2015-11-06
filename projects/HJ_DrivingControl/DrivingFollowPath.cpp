@@ -397,7 +397,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 	
 
 	// Ç‹Ç¡Ç∑ÇÆêiÇÒÇ≈Ç¢ÇÈÇ©Ç«Ç§Ç©ÇÃÇ‚Ç¬
-	if (nowDirection == FORWARD && false)
+	if (nowDirection == FORWARD)
 	{
 		rcvDroid.getOrientationData(nowOrientation);
 		dAzimuth = nowOrientation[0] - defaultOrientation[0];
@@ -415,7 +415,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 			calcNowCoord(time);
 			cout << "âÒì]" << endl;
 			//calcRotationAngle(nowCoord[0], nowCoord[1]);
-			sendRotation(-dAzimuth);
+			sendRotation(-dAzimuth * 1.5);
 			do{
 				if (aimCount_L > 0) sendDrivingCommand_count(RIGHT, aimCount_L);
 				else sendDrivingCommand_count(LEFT, aimCount_L);
