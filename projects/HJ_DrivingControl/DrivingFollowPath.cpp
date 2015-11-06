@@ -315,11 +315,16 @@ void DrivingFollowPath::checkCurrentAzimuth()
 	rcvDroid.getOrientationData(nowOrientation);
 	float dAzimuth_droid = nowOrientation[0] - defaultOrientation[0];
 	float dAzimuth_encoder = encoderOutlier ? dAzimuth_droid :
-		(leftCount * leftCoefficient - rightCount * rightCoefficient) / (wheelDistance * 2);
+		(leftCount * leftCoefficient - rightCount * rightCoefficient) / (wheelDistance * 2) * 180 / PI;
+	cout << "droid:" << dAzimuth_droid << ",encoder:" << dAzimuth_encoder << endl;
 
-	if (abs(dAzimuth_droid) > angleThresh && abs(dAzimuth_encoder) > angleThresh)
+	/*if (abs(dAzimuth_droid) > angleThresh)
 	{
 		dAzimuth = dAzimuth_droid;
+	}*/
+	if (abs(dAzimuth_encoder) > angleThresh)
+	{
+		dAzimuth = dAzimuth_encoder;
 	}
 	else dAzimuth = 0;
 }
@@ -419,8 +424,10 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 	// Ç‹Ç¡Ç∑ÇÆêiÇÒÇ≈Ç¢ÇÈÇ©Ç«Ç§Ç©ÇÃÇ‚Ç¬
 	if (nowDirection == FORWARD)
 	{
-		rcvDroid.getOrientationData(nowOrientation);
-		dAzimuth = nowOrientation[0] - defaultOrientation[0];
+		//rcvDroid.getOrientationData(nowOrientation);
+		//dAzimuth = nowOrientation[0] - defaultOrientation[0];
+
+		checkCurrentAzimuth();
 		cout << "äÓèÄ[deg]:" << defaultOrientation[0] << ",ç°[deg]:" << nowOrientation[0] << endl;
 		if (abs(dAzimuth) > angleThresh)
 		{
@@ -435,7 +442,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 			calcNowCoord(time);
 			cout << "âÒì]" << endl;
 			//calcRotationAngle(nowCoord[0], nowCoord[1]);
-			sendRotation(-dAzimuth * 1.5);
+			sendRotation(-dAzimuth );
 			do{
 				if (aimCount_L > 0) sendDrivingCommand_count(RIGHT, aimCount_L);
 				else sendDrivingCommand_count(LEFT, aimCount_L);
