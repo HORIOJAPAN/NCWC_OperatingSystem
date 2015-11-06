@@ -391,6 +391,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 	}
 	else if (nowDirection == FORWARD_SLOW)
 	{
+		sendDrivingCommand(STOP);
 		sendDrivingCommand(FORWARD, (waittime - time) * 5.4 / 9.0);
 		timer.getLapTime();
 	}
@@ -459,6 +460,8 @@ void DrivingFollowPath::run_FF()
 
 	char z = getchar();
 	//mUrgd.getAroundImage();
+	//orientation = -PI;
+
 	while (getNextPoint())
 	{
 		cout << "‰ñ“]" << endl;

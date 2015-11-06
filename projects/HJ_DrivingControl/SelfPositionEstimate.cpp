@@ -10,8 +10,8 @@ int sp_angle;
 void Hyoka1(float tilt, float dist, float matchRatio, float& score){
 	// score = matchRatio * 100;
 	// score = (matchRatio * 100 - dist / 5 * (cos(tilt * 3.1415926 / 360) + 1));
-	// score = (matchRatio * 100 - dist / 5 * (cos(tilt * 3.1415926 / 360) + 1));
-	score = 100 - pow(dist, 0.7) / matchRatio * powf((cos(tilt * PI / 360) + 1) / 2,2);
+	 //score = (matchRatio * 100 - dist / 5 * (cos(tilt * 3.1415926 / 360) + 1));
+	score = 100 - pow(dist, 0.7) / matchRatio * (cos(tilt * PI / 360) + 1) / 2;
 }
 
 void MatchingEvaluation(
@@ -81,7 +81,7 @@ void MatchingEvaluation(
 	angle_center = sp_angle;
 }
 
-# define fieldSquareSize 600		// トリミング後、フィールド画像の縦横フル長さ
+# define fieldSquareSize 400		// トリミング後、フィールド画像の縦横フル長さ
 # define matchSquareSize 200		// トリミング後、マッチ画像の縦横フル長さ
 
 # define kakudoHaba1 36		// 1回目角度幅（片方向）
