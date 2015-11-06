@@ -47,14 +47,11 @@ urg_driving::ObstacleEmergency Manage2URG_Drive::checkObstacle()
 	//ğŒ®2
 	for (int i = 0; i < dataR[0][0]; i++){
 		if (dataR[0][i] < 0 && dataR[1][i] < 0){
-			//count[3] += 1;
+			count[3] += 1;
 		}
 		else if (dataR[0][i] > 0){
 			for (int j = 0; j < dataL[0][0]; j++){
-				if (dataL[0][j] < 0 && dataL[1][j] > 0){
-					//count[4] += 1;
-				}
-				else if ((dataL[0][j] > 0)){
+				if ((dataL[0][j] > 0)){
 					adis = pow((dataR[0][i] - dataL[0][j]), 2) + pow((dataR[1][i] - (dataL[1][j] + 280)), 2);
 					if (adis < bdis){
 						bdis = adis;
@@ -76,10 +73,16 @@ urg_driving::ObstacleEmergency Manage2URG_Drive::checkObstacle()
 		}
 	}
 
+	for (int k = 0; k < dataL[0][0]; k++){
+		if (dataL[0][k] < 0 && dataL[1][k] > 0){
+			count[4] += 1;
+		}
+	}
+
 	for (int i = 0; i < 2; i++) delete[] dataL[i];
 	for (int i = 0; i < 2; i++) delete[] dataR[i];
 
-	if (count[0] > 20 || count[3] > 10 || count[4] > 10){
+	if (count[0] > 20 || count[3] > 10 || count[4] > 5){
 		//’â~‚·‚éw—ß‚ğ‘—‚é
 		return urg_driving::ObstacleEmergency::DETECT;
 
