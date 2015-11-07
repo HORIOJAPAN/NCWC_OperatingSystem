@@ -315,18 +315,12 @@ void DrivingFollowPath::checkCurrentAzimuth()
 {
 	rcvDroid.getOrientationData(nowOrientation);
 	float dAzimuth_droid = nowOrientation[0] - defaultOrientation[0];
-	float dAzimuth_encoder = encoderOutlier ? dAzimuth_droid :
-		(leftCount * leftCoefficient - rightCount * rightCoefficient) / (wheelDistance * 2) * 180 / PI;
-	cout << "droid:" << dAzimuth_droid << ",encoder:" << dAzimuth_encoder << endl;
+	cout << "droidの角度変位[deg]:" << dAzimuth_droid << endl;
 
 	if (abs(dAzimuth_droid) > angleThresh && abs(dAzimuth_droid) < 20)
 	{
 		dAzimuth = dAzimuth_droid;
 	}
-	/*if (abs(dAzimuth_encoder) > angleThresh)
-	{
-		dAzimuth = dAzimuth_encoder;
-	}*/
 	else dAzimuth = 0;
 }
 
@@ -342,17 +336,8 @@ void DrivingFollowPath::waitDriveComplete()
 	sendDrivingCommand(STOP);
 }
 // 緊急停止後の駆動再開指令
-void DrivingFollowPath::restart(int time, Timer& timer, int encoderLRtmp[])
+void DrivingFollowPath::restart(int time, Timer& timer)
 {
-	// エンコーダの値が停止前から変化していたら．．．とりあえず変化してなかったことにする
-	//getEncoderCount();
-	//int dLeft = leftCount - encoderLRtmp[0];
-	//int dRight = rightCount - encoderLRtmp[1];
-	//aimCount_L += dLeft;
-	//aimCount_R += dRight;
-	//leftCount = encoderLRtmp[0];
-	//rightCount = encoderLRtmp[1];
-
 	if (nowDirection != STOP) sendDrivingCommand(nowDirection, waittime - time);
 	else sendDrivingCommand(preDirection, waittime - time);
 	timer.getLapTime();
@@ -360,38 +345,14 @@ void DrivingFollowPath::restart(int time, Timer& timer, int encoderLRtmp[])
 // 非常停止しているかどうかと，するべきかどうかのチェック
 void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 {
-	bool left = false;
-	bool right = false;
+	int time = timer.getLapTime(1, Timer::millisec, false);
 
-	int encoderLRtmp[2] = { leftCount, rightCount };
-
-	int time = timer.getLapTime(1, Timer::millisec, false) - 1000;
-	if (time < 0) time = 0;
-	/*
-	cout << time << "millisec" << endl;
-	cout << time * abs(aimCount_L) << "," << abs(leftCount) * waittime << endl;
-	cout << leftCount << "," << rightCount << endl;
-	cout << aimCount_L << "," << aimCount_R << endl;
-	cout << waittime << endl;
-	*/
-
-
-	//if (((float)time + 1000) / (float)waittime * 100 > 98) return;
-
-	if (time * abs(aimCount_L) > abs(leftCount) * waittime)     left = true;
-	if (time * abs(aimCount_R) > abs(rightCount) * waittime)    right = true;
-
-	if(left || right&& nowDirection != STOP)
-	{
-		cout << "非常停止してるかも" << endl;
-		encoderOutlier = true;
-		DrivingControl::sendDrivingCommand(1, 0, 0, 0);
-		if (!lastReadBytes){
-			if (MessageBoxA(NULL, "もしかして非常停止してる？？\n動いてもいい？？", "もしかして！", MB_YESNO | MB_ICONSTOP) == IDYES)
-				restart(time, timer,encoderLRtmp);
-		}
+	DrivingControl::sendDrivingCommand(1, 0, 0, 0);
+	if (!lastReadBytes){
+		cout << "非常停止してるズラ！" << endl;
+		if (MessageBoxA(NULL, "もしかして非常停止してる？？\n動いてもいい？？", "もしかして！", MB_YESNO | MB_ICONSTOP) == IDYES)
+			restart(time, timer);
 	}
-	else if (encoderOutlier) encoderOutlier = false;
 	
 	if (urg_driving::ObstacleEmergency emergency = mUrgd.checkObstacle())
 	{
@@ -401,21 +362,21 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 			cout << "DETECT" << endl;
 			sendDrivingCommand(STOP);
 			while (mUrgd.checkObstacle() == urg_driving::ObstacleEmergency::DETECT);
-			restart(time, timer, encoderLRtmp);
+			restart(time, timer);
 			break;
 
 		case urg_driving::ObstacleEmergency::DETECT_LEFT:
 			cout << "DETECT_LEFT" << endl;
 			sendDrivingCommand(STOP);
 			while (mUrgd.checkObstacle() == urg_driving::ObstacleEmergency::DETECT);
-			restart(time, timer, encoderLRtmp);
+			restart(time, timer);
 			break;
 
 		case urg_driving::ObstacleEmergency::DETECT_RIGHT:
 			cout << "DETECT_RIGHT" << endl;
 			sendDrivingCommand(STOP);
 			while (mUrgd.checkObstacle() == urg_driving::ObstacleEmergency::DETECT);
-			restart(time, timer, encoderLRtmp);
+			restart(time, timer);
 			break;
 
 		case urg_driving::ObstacleEmergency::SLOW1:

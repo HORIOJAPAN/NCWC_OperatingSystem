@@ -137,7 +137,7 @@ private:
 	bool encoderOutlier = false;
 
 	void checkEmergencyStop(Timer& timer);
-	void restart(int time, Timer& timer,int encoderLRtmp[]);
+	void restart(int time, Timer& timer);
 
 	Manage2URG_Drive mUrgd;
 	rcvAndroidSensors rcvDroid;
