@@ -423,7 +423,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 	
 
 	// Ç‹Ç¡Ç∑ÇÆêiÇÒÇ≈Ç¢ÇÈÇ©Ç«Ç§Ç©ÇÃÇ‚Ç¬
-	if (nowDirection == FORWARD)
+	if ( nowDirection == FORWARD)
 	{
 		rcvDroid.getOrientationData(nowOrientation);
 		dAzimuth = nowOrientation[0] - defaultOrientation[0];
@@ -488,6 +488,8 @@ void DrivingFollowPath::run_FF()
 	char z = getchar();
 	//mUrgd.getAroundImage();
 	orientation = -89 * PI /180;
+	
+	rcvDroid.setIsSaveOrientationCSV(true);
 
 	while (getNextPoint())
 	{

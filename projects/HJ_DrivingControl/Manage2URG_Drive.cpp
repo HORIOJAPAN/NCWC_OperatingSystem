@@ -120,7 +120,6 @@ void Manage2URG_Drive::getAroundImage(int width, int height, int resolution, int
 	}
 	urg_driving::getPCImage(tmTemplate);
 	cv::imshow("show", tmTemplate);
-	cv::waitKey(0);
 }
 
 void Manage2URG_Drive::readMapImage(string mapName)

@@ -16,7 +16,7 @@ void main()
 	DrivingFollowPath DFP("../../data/route/gakunaitest1.rt", 24.00865177 , 24.03543307, ENCODER_COM, CONTROLLER_COM);
 	//DrivingFollowPath DFP("../../data/route/test09.rt", 24.00865177, 24.03543307, ENCODER_COM, CONTROLLER_COM);
 	DFP.setURGParam(URG_COM, urgPOS, sizeof(URG_COM) / sizeof(int));
-	DFP.readMapImage("../../data/route/fieldMap3.jpg");
+	DFP.readMapImage("../../data/route/fieldMap4.jpg");
 	DFP.setAndroidCOM(ANDROID_COM);
 	DFP.run_FF();
 

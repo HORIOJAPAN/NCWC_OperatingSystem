@@ -237,6 +237,7 @@ void main()
 	float dummy[3] = { 0 };
 
 	rcvAndroidSensors rcvDroid(16);
+	rcvDroid.setIsGetOrientation(true);
 
 	while (true)
 	{
