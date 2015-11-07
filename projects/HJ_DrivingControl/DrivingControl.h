@@ -48,7 +48,7 @@ class urg_driving
 	: public urg_mapping
 {
 public:
-	enum ObstacleEmergency { NONE, DETECT, SLOW1, SLOW2 };
+	enum ObstacleEmergency { NONE, DETECT, DETECT_LEFT, DETECT_RIGHT, SLOW1, SLOW2 };
 	ObstacleEmergency checkObstacle();
 	void getObstacleData(float*& data_x , float*& data_y);
 };

@@ -19,7 +19,7 @@ urg_driving::ObstacleEmergency Manage2URG_Drive::checkObstacle()
 
 	float* dataL[2], *dataR[2];
 	float adis = 0.0, bdis = 0.0;
-	int count[5] = {0, 0, 0, 0, 0};
+	int count[7] = {0, 0, 0, 0, 0, 0, 0};
 
 	urgdArray[0].getObstacleData(dataR[0], dataR[1]);
 	urgdArray[1].getObstacleData(dataL[0], dataL[1]);
@@ -46,25 +46,33 @@ urg_driving::ObstacleEmergency Manage2URG_Drive::checkObstacle()
 
 	//条件式2
 	for (int i = 0; i < dataR[0][0]; i++){
-		if (dataR[0][i] < 0 && dataR[1][i] < 0){
+		if (dataR[0][i] < 0.0 && dataR[1][i] < 0.0){
 			count[3] += 1;
 		}
-		else if (dataR[0][i] > 0){
+		else if (dataR[0][i] > 0.0){
 			for (int j = 0; j < dataL[0][0]; j++){
 				if ((dataL[0][j] > 0)){
-					adis = pow((dataR[0][i] - dataL[0][j]), 2) + pow((dataR[1][i] - (dataL[1][j] + 280)), 2);
+					adis = pow((dataR[0][i] - dataL[0][j]), 2) + pow((dataR[1][i] - (dataL[1][j] + 525.0)), 2);
 					if (adis < bdis){
 						bdis = adis;
 					}
-					if (bdis < 2500 && 600 < dataR[0][i]){
+					if (bdis < 2500.0 && 600.0 < dataR[0][i]){
 						count[1] += 1;
 						break;
 					}
-					else if (bdis < 2500 && 500 < dataR[0][i] && dataR[0][i] < 600){
+					else if (bdis < 2500.0 && 500.0 < dataR[0][i] && dataR[0][i] < 600.0){
 						count[2] += 1;
 						break;
 					}
-					else if (bdis < 2500 && dataR[0][i] < 500){
+					/*else if (bdis < 2500.0 && 0.0 < dataL[0][j] && dataL[1][j] < -650.0){
+						count[5] += 1;
+						break;
+					}
+					else if (bdis < 2500.0 && 0.0 < dataL[0][j] && 120.0 < dataL[1][j]){
+						count[6] += 1;
+						break;
+					}*/
+					else if (bdis < 2500.0 && dataR[0][i] < 500.0){
 						count[0] += 1;
 						break;
 					}
@@ -74,7 +82,7 @@ urg_driving::ObstacleEmergency Manage2URG_Drive::checkObstacle()
 	}
 
 	for (int k = 0; k < dataL[0][0]; k++){
-		if (dataL[0][k] < 0 && dataL[1][k] > 0){
+		if (dataL[0][k] < 0.0 && dataL[1][k] > 0.0){
 			count[4] += 1;
 		}
 	}
@@ -82,10 +90,19 @@ urg_driving::ObstacleEmergency Manage2URG_Drive::checkObstacle()
 	for (int i = 0; i < 2; i++) delete[] dataL[i];
 	for (int i = 0; i < 2; i++) delete[] dataR[i];
 
-	if (count[0] > 20 || count[3] > 10 || count[4] > 5){
-		//停止する指令を送る
+	if (count[0] > 20){
+		//前方に障害物あり、停止する指令を送る
 		return urg_driving::ObstacleEmergency::DETECT;
-
+		//printf("点の数　= %d\n", count);
+	}
+	else if (count[3] > 10 || count[5] > 10){
+		//左側に障害物あり、停止する指令を送る
+		return urg_driving::ObstacleEmergency::DETECT_LEFT;
+		//printf("点の数　= %d\n", count);
+	}
+	else if (count[4] > 10 || count[6] > 10){
+		//右側に障害物あり、停止する指令を送る
+		return urg_driving::ObstacleEmergency::DETECT_RIGHT;
 		//printf("点の数　= %d\n", count);
 	}
 	else if (count[1] > 10){

@@ -404,6 +404,20 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 			restart(time, timer, encoderLRtmp);
 			break;
 
+		case urg_driving::ObstacleEmergency::DETECT_LEFT:
+			cout << "DETECT_LEFT" << endl;
+			sendDrivingCommand(STOP);
+			while (mUrgd.checkObstacle() == urg_driving::ObstacleEmergency::DETECT);
+			restart(time, timer, encoderLRtmp);
+			break;
+
+		case urg_driving::ObstacleEmergency::DETECT_RIGHT:
+			cout << "DETECT_RIGHT" << endl;
+			sendDrivingCommand(STOP);
+			while (mUrgd.checkObstacle() == urg_driving::ObstacleEmergency::DETECT);
+			restart(time, timer, encoderLRtmp);
+			break;
+
 		case urg_driving::ObstacleEmergency::SLOW1:
 		case urg_driving::ObstacleEmergency::SLOW2:
 			if (nowDirection == FORWARD_SLOW) break;
