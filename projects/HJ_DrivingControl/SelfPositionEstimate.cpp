@@ -184,6 +184,6 @@ void Manage2URG_Drive::tMatching(int& pos_x, int& pos_y, double& angle,int mapNu
 		pos_y = sp_y;
 		angle = -sp_angle * PI / 180;
 	}
-	waitKey(0);
+	waitKey(10000);
 	//destroyAllWindows();
 }

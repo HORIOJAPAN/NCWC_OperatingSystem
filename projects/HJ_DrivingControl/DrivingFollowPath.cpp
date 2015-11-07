@@ -347,11 +347,16 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 {
 	int time = timer.getLapTime(1, Timer::millisec, false);
 
-	DrivingControl::sendDrivingCommand(1, 0, 0, 0);
-	if (!lastReadBytes){
-		cout << "非常停止してるズラ！" << endl;
-		if (MessageBoxA(NULL, "もしかして非常停止してる？？\n動いてもいい？？", "もしかして！", MB_YESNO | MB_ICONSTOP) == IDYES)
-			restart(time, timer);
+	emergencyCount += time;
+	if (emergencyCount > 500)
+	{
+		DrivingControl::sendDrivingCommand(1, 0, 0, 0);
+		if (!lastReadBytes){
+			cout << "非常停止してるズラ！" << endl;
+			if (MessageBoxA(NULL, "もしかして非常停止してる？？\n動いてもいい？？", "もしかして！", MB_YESNO | MB_ICONSTOP) == IDYES)
+				restart(time, timer);
+		}
+		emergencyCount = 0;
 	}
 	
 	if (urg_driving::ObstacleEmergency emergency = mUrgd.checkObstacle())

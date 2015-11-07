@@ -111,6 +111,7 @@ private:
 	bool	isEncoderInitialized = false;
 	int		leftCount, rightCount;
 	long	totalLeftCount, totalRightCount;
+	int		emergencyCount;
 
 	// Arduino‚Ö‚Ì‹ì“®Žw—ßŠÖ˜A
 	enum Direction	{ STOP, FORWARD , FORWARD_SLOW , BACKWARD, RIGHT, LEFT };
