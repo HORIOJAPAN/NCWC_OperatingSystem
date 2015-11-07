@@ -5,6 +5,7 @@ using namespace cv;
 int sp_x;
 int sp_y;
 int sp_angle;
+int sp_score;
 
 
 void Hyoka1(float tilt, float dist, float matchRatio, float& score){
@@ -68,6 +69,7 @@ void MatchingEvaluation(
 						Pt = Point(k, j);
 						maxDistance = distance;
 						maxEvaluation = Evaluation1;
+						sp_score = Evaluation1;
 					}
 				}
 			}
@@ -138,7 +140,10 @@ void spEstimate(int ideal_x, int ideal_y, float ideal_angle, Mat img1, Mat img2)
 	Mat kaitenImg;
 	Mat matrix = cv::getRotationMatrix2D(center, tempAngle, 1);
 	warpAffine(matchMap, kaitenImg, matrix, matchMap.size());
-	rectangle(fieldMap, Point(sp_x + kaitenImg.cols / 2, sp_y + kaitenImg.rows / 2), Point(sp_x + kaitenImg.cols / 2, sp_y + kaitenImg.rows / 2), Scalar(0, 0, 255), 2, 8, 0);
+	// rectangle(fieldMap, Point(sp_x + kaitenImg.cols / 2, sp_y + kaitenImg.rows / 2), Point(sp_x + kaitenImg.cols / 2, sp_y + kaitenImg.rows / 2), Scalar(0, 0, 255), 2, 8, 0);
+	circle(fieldMap, Point(sp_x + kaitenImg.cols / 2, sp_y + kaitenImg.rows / 2), 6, Scalar(0, 0, 255), 1, CV_AA, 0);
+	circle(kaitenImg, Point(kaitenImg.cols / 2, kaitenImg.rows / 2), 6, Scalar(0, 0, 255), 1, CV_AA, 0);
+
 
 	imshow("Image", fieldMap);
 	imshow("kaitenImg", kaitenImg);
@@ -156,6 +161,7 @@ void Manage2URG_Drive::tMatching(int& pos_x, int& pos_y, double& angle,int mapNu
 	sp_x = ideal_x = pos_x;
 	sp_y = ideal_y = pos_y;
 	sp_angle = ideal_angle = -angle * 180 / PI;
+	sp_score = 0;
 
 	this->getAroundImage();
 
@@ -170,13 +176,14 @@ void Manage2URG_Drive::tMatching(int& pos_x, int& pos_y, double& angle,int mapNu
 	sp_y += ideal_y - (fieldSquareSize) / 2;
 	*/
 	std::cout << "入力：\n相対度\tx,y\n" << ideal_angle << "   \t" << ideal_x << "," << ideal_y << std::endl;
-	std::cout << "出力：\n相対度\tx,y\n" << sp_angle << "   \t" << sp_x << "," << sp_y << std::endl;
+	std::cout << "出力：\n相対度\tx,y\tscore\n" << sp_angle << "   \t" << sp_x << "," << sp_y << "\t" << sp_score << std::endl;
 	std::cout << "処理時間：" << clock() - start << "[ms]" << std::endl;
 
-	pos_x = sp_x;
-	pos_y = sp_y;
-	angle = -sp_angle * PI / 180;
-
+	if (sp_score > 1){
+		pos_x = sp_x;
+		pos_y = sp_y;
+		angle = -sp_angle * PI / 180;
+	}
 	waitKey(0);
 	//destroyAllWindows();
 }
