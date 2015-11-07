@@ -28,6 +28,7 @@ DrivingFollowPath::DrivingFollowPath(string fname, double coefficientL, double c
 	getArduinoHandle(encoderCOM, hEncoderComm, 500);
 	setControllerCOM(controllerCOM);
 
+	overdelayCount = 0;
 }
 
 /*
@@ -318,14 +319,14 @@ void DrivingFollowPath::checkCurrentAzimuth()
 		(leftCount * leftCoefficient - rightCount * rightCoefficient) / (wheelDistance * 2) * 180 / PI;
 	cout << "droid:" << dAzimuth_droid << ",encoder:" << dAzimuth_encoder << endl;
 
-	/*if (abs(dAzimuth_droid) > angleThresh)
+	if (abs(dAzimuth_droid) > angleThresh && abs(dAzimuth_droid) < 20)
 	{
 		dAzimuth = dAzimuth_droid;
-	}*/
-	if (abs(dAzimuth_encoder) > angleThresh)
+	}
+	/*if (abs(dAzimuth_encoder) > angleThresh)
 	{
 		dAzimuth = dAzimuth_encoder;
-	}
+	}*/
 	else dAzimuth = 0;
 }
 
@@ -424,12 +425,12 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 	// Ç‹Ç¡Ç∑ÇÆêiÇÒÇ≈Ç¢ÇÈÇ©Ç«Ç§Ç©ÇÃÇ‚Ç¬
 	if (nowDirection == FORWARD)
 	{
-		//rcvDroid.getOrientationData(nowOrientation);
-		//dAzimuth = nowOrientation[0] - defaultOrientation[0];
+		rcvDroid.getOrientationData(nowOrientation);
+		dAzimuth = nowOrientation[0] - defaultOrientation[0];
 
-		checkCurrentAzimuth();
+		//checkCurrentAzimuth();
 		cout << "äÓèÄ[deg]:" << defaultOrientation[0] << ",ç°[deg]:" << nowOrientation[0] << endl;
-		if (abs(dAzimuth) > angleThresh)
+		if (abs(dAzimuth) > angleThresh && abs(dAzimuth) < 20)
 		{
 			dAzimuth *= PI / 180;
 			int preWaittime = waittime;
@@ -442,7 +443,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 			calcNowCoord(time);
 			cout << "âÒì]" << endl;
 			//calcRotationAngle(nowCoord[0], nowCoord[1]);
-			sendRotation(-dAzimuth );
+			sendRotation(-dAzimuth * 1.5 );
 			do{
 				if (aimCount_L > 0) sendDrivingCommand_count(RIGHT, aimCount_L);
 				else sendDrivingCommand_count(LEFT, aimCount_L);
@@ -486,7 +487,7 @@ void DrivingFollowPath::run_FF()
 
 	char z = getchar();
 	//mUrgd.getAroundImage();
-	//orientation = -PI;
+	orientation = -89 * PI /180;
 
 	while (getNextPoint())
 	{
