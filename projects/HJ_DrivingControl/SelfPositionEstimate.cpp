@@ -179,10 +179,11 @@ void Manage2URG_Drive::tMatching(int& pos_x, int& pos_y, double& angle,int mapNu
 	std::cout << "出力：\n相対度\tx,y\tscore\n" << sp_angle << "   \t" << sp_x << "," << sp_y << "\t" << sp_score << std::endl;
 	std::cout << "処理時間：" << clock() - start << "[ms]" << std::endl;
 
-	pos_x = sp_x;
-	pos_y = sp_y;
-	angle = -sp_angle * PI / 180;
-
+	if (sp_score > 1){
+		pos_x = sp_x;
+		pos_y = sp_y;
+		angle = -sp_angle * PI / 180;
+	}
 	waitKey(0);
 	//destroyAllWindows();
 }
