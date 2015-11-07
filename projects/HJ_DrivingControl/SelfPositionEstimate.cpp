@@ -84,7 +84,7 @@ void MatchingEvaluation(
 	angle_center = sp_angle;
 }
 
-# define fieldSquareSize 400		// トリミング後、フィールド画像の縦横フル長さ
+# define fieldSquareSize 500		// トリミング後、フィールド画像の縦横フル長さ
 # define matchSquareSize 200		// トリミング後、マッチ画像の縦横フル長さ
 
 # define kakudoHaba1 36		// 1回目角度幅（片方向）
