@@ -236,7 +236,8 @@ void main()
 {
 	float dummy[3] = { 0 };
 
-	rcvAndroidSensors rcvDroid(16);
+	rcvAndroidSensors rcvDroid(1);
+	rcvDroid.setIsSaveOrientationCSV(true);
 
 	while (true)
 	{

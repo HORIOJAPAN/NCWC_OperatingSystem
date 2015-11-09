@@ -236,11 +236,12 @@ double	DrivingFollowPath::calcRotationAngle( int nowCoord_x , int nowCoord_y  )
 	double det = vector1_x * vector2_y - vector1_y * vector2_x;
 	double inner = vector1_x * vector2_x + vector1_y * vector2_y;
 
-	return atan2(det, inner);
+	double radian = atan2(det, inner);
+	orientation += radian;
+	return radian;
 }
 void	DrivingFollowPath::sendRotation(double radian)
 {
-	orientation += radian;
 
 	cout << "rad:" << radian << ", deg:" << radian / PI * 180 << endl;
 	cout << "rad:" << orientation << ", deg:" << orientation / PI * 180 << endl;
@@ -410,7 +411,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 
 		//checkCurrentAzimuth();
 		cout << "äÓèÄ[deg]:" << defaultOrientation[0] << ",ç°[deg]:" << nowOrientation[0] << endl;
-		if (abs(dAzimuth) > angleThresh && abs(dAzimuth) < 20)
+		if (abs(dAzimuth) > angleThresh && abs(dAzimuth) < 30)
 		{
 			dAzimuth *= PI / 180;
 			int preWaittime = waittime;
@@ -423,6 +424,8 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 			calcNowCoord(time);
 			cout << "âÒì]" << endl;
 			//calcRotationAngle(nowCoord[0], nowCoord[1]);
+			int overtmp = overdelayCount;
+			overdelayCount = 0;
 			sendRotation(-dAzimuth * 1.5 );
 			do{
 				if (aimCount_L > 0) sendDrivingCommand_count(RIGHT, aimCount_L);
@@ -435,6 +438,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 			// íºêiçƒäJ
 			cout << "íºêi" << endl;
 			//calcMovingDistance(nowCoord[0], nowCoord[1]);
+			overdelayCount = overtmp;
 			sendStraight( calcMovingDistance());
 			sendDrivingCommand(FORWARD, preWaittime - time);
 			timer.getLapTime();
@@ -466,10 +470,6 @@ void DrivingFollowPath::run_FF()
 	getEncoderCount();
 
 	char z = getchar();
-	//mUrgd.getAroundImage();
-	orientation = -89 * PI /180;
-	
-	rcvDroid.setIsSaveOrientationCSV(true);
 
 	while (getNextPoint())
 	{
