@@ -466,10 +466,6 @@ void DrivingFollowPath::run_FF()
 	getEncoderCount();
 
 	char z = getchar();
-	//mUrgd.getAroundImage();
-	orientation = -89 * PI /180;
-	
-	rcvDroid.setIsSaveOrientationCSV(true);
 
 	while (getNextPoint())
 	{

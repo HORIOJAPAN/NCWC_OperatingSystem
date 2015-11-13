@@ -145,8 +145,8 @@ void spEstimate(int ideal_x, int ideal_y, float ideal_angle, Mat img1, Mat img2)
 	circle(kaitenImg, Point(kaitenImg.cols / 2, kaitenImg.rows / 2), 6, Scalar(0, 0, 255), 1, CV_AA, 0);
 
 
-	imshow("Image", fieldMap);
-	imshow("kaitenImg", kaitenImg);
+	//imshow("Image", fieldMap);
+	//imshow("kaitenImg", kaitenImg);
 }
 
 int ideal_angle = 0;
@@ -184,6 +184,6 @@ void Manage2URG_Drive::tMatching(int& pos_x, int& pos_y, double& angle,int mapNu
 		pos_y = sp_y;
 		angle = -sp_angle * PI / 180;
 	}
-	waitKey(10000);
+	//waitKey(10000);
 	//destroyAllWindows();
 }

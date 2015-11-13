@@ -202,18 +202,29 @@ void urg_unko::calcSurface2D()
 			//点までの角度を取得してxyに変換
 			//(極座標で取得されるデータをデカルト座標に変換)
 			radian = urg_index2rad(&urg, i);
-			x = (float)(l * cos(radian));
+			
+			// センサ平面時の取得座標
+			/*x = (float)(l * cos(radian));
 			y = (float)(l * sin(radian));
-			z = urgpos[0];
+			z = urgpos[0];*/
 
-			//2次元平面の座標変換
+			// センサ空間時の取得座標
+			x = (float)(l * cos(radian) + urgpos[3]);
+			y = -(float)(l * sin(radian) + urgpos[3]);
+			z = 0.0;
+
+			// 2次元平面の座標変換
 			//pointpos[0] = +cos(this->radian) * x + sin(this->radian) * y + cos(this->radian) * (distance - distance_old + urgpos[1]) + currentCoord_x;
 			//pointpos[1] = -sin(this->radian) * x + cos(this->radian) * y - sin(this->radian) * (distance - distance_old + urgpos[1]) + currentCoord_y;
 
+			// 2次元平面の座標変換
 			this->pointpos[0][i] = +cos(this->radian + urgpos[3]) * x + sin(this->radian + urgpos[3]) * y + cos(this->radian) * (distance - distance_old + urgpos[1]) + sin(this->radian) * urgpos[2] + currentCoord_x;
 			this->pointpos[1][i] = -sin(this->radian + urgpos[3]) * x + cos(this->radian + urgpos[3]) * y - sin(this->radian) * (distance - distance_old + urgpos[1]) + cos(this->radian) * urgpos[2] + currentCoord_y;
 
-			pointpos[2] = z;
+			// 3次元空間の座標変換
+			//this->pointpos[0][i] = - sin(this->radian) * y + cos(this->radian) * z - sin(this->radian) * (distance - distance_old + urgpos[1]) + sin(this->radian) * urgpos[2] + currentCoord_x;
+			//this->pointpos[1][i] = + cos(this->radian) * y + sin(this->radian) * z + cos(this->radian) * (distance - distance_old + urgpos[1]) + cos(this->radian) * urgpos[2] + currentCoord_y;
+			//this->pointpos[2][i] = x + urgpos[0];
 
 		}
 	}
@@ -235,6 +246,7 @@ void urg_unko::savePCD()
 	for (int i = 0; i < data_n; i++)
 	{
 		pcd.pcdWrite(pointpos[0][i] / 1000, pointpos[1][i] / 1000, currentCoord_x / 1000, currentCoord_y / 1000);
+		//pcd.pcdWrite(pointpos[0][i] / 1000, pointpos[1][i] / 1000, pointpos[2][i] / 1000);
 	}
 	pcd.pcdSave();
 }
@@ -328,6 +340,14 @@ void writePCD::pcdWrite(float x, float y, float pos_x, float pos_y)
 
 	//データを書き込んでデータ数をカウント
 	*this << x << ", " << y << ", " << pos_x << ", " << pos_y << ", " << endl;
+	pcdcount++;
+}
+void writePCD::pcdWrite(float x, float y, float z)
+{
+	if (!isWritePCD) return;
+
+	//データを書き込んでデータ数をカウント
+	*this << x << ", " << y << ", " << z << endl;
 	pcdcount++;
 }
 /*
