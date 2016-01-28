@@ -128,7 +128,7 @@ void Manage2URG_Drive::getAroundImage(int width, int height, int resolution, int
 	PCImage::BGR color[2] = { PCImage::B, PCImage::G };
 	for (int times = 0; times < measurementTimes; times++)
 	{
-		for (int i = 0; i < 2; i++)
+		for (int i = 0; i < 1; i++)
 		{
 			urgdArray[i].setWriteLine(false);
 			urgdArray[i].setPCImageColor(color[i]);

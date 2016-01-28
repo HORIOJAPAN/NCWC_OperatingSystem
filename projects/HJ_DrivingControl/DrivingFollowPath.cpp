@@ -12,7 +12,7 @@ DrivingFollowPath::DrivingFollowPath(string fname, double coefficientL, double c
 	ifs.open(fileName);
 	if (ifs.fail())
 	{
-		cerr << "False" << endl;
+		cerr << "unko False" << endl;
 		return;
 	}
 	// ヘッダ部分をとばす
@@ -236,11 +236,12 @@ double	DrivingFollowPath::calcRotationAngle( int nowCoord_x , int nowCoord_y  )
 	double det = vector1_x * vector2_y - vector1_y * vector2_x;
 	double inner = vector1_x * vector2_x + vector1_y * vector2_y;
 
-	return atan2(det, inner);
+	double radian = atan2(det, inner);
+	orientation += radian;
+	return radian;
 }
 void	DrivingFollowPath::sendRotation(double radian)
 {
-	orientation += radian;
 
 	cout << "rad:" << radian << ", deg:" << radian / PI * 180 << endl;
 	cout << "rad:" << orientation << ", deg:" << orientation / PI * 180 << endl;
@@ -359,7 +360,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 		emergencyCount = 0;
 	}
 	
-	if (urg_driving::ObstacleEmergency emergency = mUrgd.checkObstacle())
+	/*if (urg_driving::ObstacleEmergency emergency = mUrgd.checkObstacle())
 	{
 		switch (emergency)
 		{
@@ -400,7 +401,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 		sendDrivingCommand(FORWARD, (waittime - time) * 5.4 / 9.0);
 		timer.getLapTime();
 	}
-	
+	*/
 
 	// まっすぐ進んでいるかどうかのやつ
 	if ( nowDirection == FORWARD)
@@ -410,7 +411,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 
 		//checkCurrentAzimuth();
 		cout << "基準[deg]:" << defaultOrientation[0] << ",今[deg]:" << nowOrientation[0] << endl;
-		if (abs(dAzimuth) > angleThresh && abs(dAzimuth) < 20)
+		if (abs(dAzimuth) > angleThresh && abs(dAzimuth) < 30)
 		{
 			dAzimuth *= PI / 180;
 			int preWaittime = waittime;
@@ -423,6 +424,8 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 			calcNowCoord(time);
 			cout << "回転" << endl;
 			//calcRotationAngle(nowCoord[0], nowCoord[1]);
+			int overtmp = overdelayCount;
+			overdelayCount = 0;
 			sendRotation(-dAzimuth * 1.5 );
 			do{
 				if (aimCount_L > 0) sendDrivingCommand_count(RIGHT, aimCount_L);
@@ -435,6 +438,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 			// 直進再開
 			cout << "直進" << endl;
 			//calcMovingDistance(nowCoord[0], nowCoord[1]);
+			overdelayCount = overtmp;
 			sendStraight( calcMovingDistance());
 			sendDrivingCommand(FORWARD, preWaittime - time);
 			timer.getLapTime();

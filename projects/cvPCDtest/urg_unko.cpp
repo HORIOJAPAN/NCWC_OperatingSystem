@@ -209,9 +209,8 @@ void urg_unko::calcSurface2D()
 			z = urgpos[0];*/
 
 			// センサ空間時の取得座標
-			x = (float)(l * cos(radian) + urgpos[3]);
-			y = -(float)(l * sin(radian) + urgpos[3]);
-			z = 0.0;
+			x = (float)(l * cos(radian + urgpos[3]));
+			y = -(float)(l * sin(radian + urgpos[3]));
 
 			// 2次元平面の座標変換
 			//pointpos[0] = +cos(this->radian) * x + sin(this->radian) * y + cos(this->radian) * (distance - distance_old + urgpos[1]) + currentCoord_x;
@@ -222,8 +221,8 @@ void urg_unko::calcSurface2D()
 			this->pointpos[1][i] = -sin(this->radian + urgpos[3]) * x + cos(this->radian + urgpos[3]) * y - sin(this->radian) * (distance - distance_old + urgpos[1]) + cos(this->radian) * urgpos[2] + currentCoord_y;
 
 			// 3次元空間の座標変換
-			//this->pointpos[0][i] = - sin(this->radian) * y + cos(this->radian) * z - sin(this->radian) * (distance - distance_old + urgpos[1]) + sin(this->radian) * urgpos[2] + currentCoord_x;
-			//this->pointpos[1][i] = + cos(this->radian) * y + sin(this->radian) * z + cos(this->radian) * (distance - distance_old + urgpos[1]) + cos(this->radian) * urgpos[2] + currentCoord_y;
+			//this->pointpos[0][i] = -sin(this->radian) * y + cos(this->radian) * ((distance - distance_old) * i / data_n) - sin(this->radian) * urgpos[1] + sin(this->radian) * urgpos[2] + currentCoord_x;
+			//this->pointpos[1][i] = +cos(this->radian) * y + sin(this->radian) * ((distance - distance_old) * i / data_n) + cos(this->radian) * urgpos[1] + cos(this->radian) * urgpos[2] + currentCoord_y;
 			//this->pointpos[2][i] = x + urgpos[0];
 
 		}
@@ -245,8 +244,8 @@ void urg_unko::savePCD()
 	pcd.pcdinit();
 	for (int i = 0; i < data_n; i++)
 	{
-		pcd.pcdWrite(pointpos[0][i] / 1000, pointpos[1][i] / 1000, currentCoord_x / 1000, currentCoord_y / 1000);
-		//pcd.pcdWrite(pointpos[0][i] / 1000, pointpos[1][i] / 1000, pointpos[2][i] / 1000);
+		//pcd.pcdWrite(pointpos[0][i] / 1000, pointpos[1][i] / 1000, currentCoord_x / 1000, currentCoord_y / 1000);
+		pcd.pcdWrite(pointpos[0][i] / 1000, pointpos[1][i] / 1000, pointpos[2][i] / 1000);
 	}
 	pcd.pcdSave();
 }
