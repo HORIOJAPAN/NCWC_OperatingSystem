@@ -12,6 +12,7 @@
 #include "../Timer/Timer.h"
 #include "../cvPCDtest/urg_unko.h"
 #include "../HJ_ReceiveAndroidSensors/receiveAndroidSensors.h"
+#include "../../SharedMemoryTESTpp/SharedMemory.h"
 
 using namespace std;
 

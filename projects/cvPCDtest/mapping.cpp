@@ -31,6 +31,9 @@ extern int imgWidth, imgHeight, imgResolution;
 //左右輪のエンコーダ生データ積算用
 int data_L = 0, data_R = 0;
 
+//1カウント当たりの距離
+double encord_dis_L=12.3567, encord_dis_R=12.3962;
+
 //数値の表示
 void meter(Mat pic, float data[] , string name[], int NumOfData)
 {
@@ -119,12 +122,12 @@ int Encoder(HANDLE hComm, float& dist, float& rad)
 	data_R += static_cast<int>(receive_char2);
 
 	//左右輪の回転量から移動量を計算
-	DL = receive_char1 * 23.6758719281;
-	DR = receive_char2 * 23.751783167;
+	DL = receive_char1 * encord_dis_L;/////////////////////////////////////////////////////////////////////////////
+	DR = receive_char2 * encord_dis_R;
 
 	//移動距離，回転量を計算
 	DIS = (DL + DR) / 2;
-	ANG = -(DL - DR) / 530;	//右回転が正
+	ANG = -(DL - DR) / 541;	//右回転が正
 
 	//移動量，回転量を積算用変数へ積算
 	dist += DIS;
@@ -229,7 +232,7 @@ void getDataUNKOOrigin(int URG_COM[], float URGPOS[][4], int ARDUINO_COM, int Nu
 	//エンコーダの初期化
 	Encoder(handle_ARDUINO, dist, rad);
 
-	PCImage::isColor = true;
+	PCImage::isColor = false;
 	PCImage::BGR color[2] = { PCImage::B, PCImage::G };
 	
 	urg_mapping::initPCImage(imgWidth,imgHeight,imgResolution);
@@ -257,8 +260,10 @@ void getDataUNKOOrigin(int URG_COM[], float URGPOS[][4], int ARDUINO_COM, int Nu
 		// 処理の間隔を指定時間あける
 		if (timer.getLapTime(1, Timer::millisec, false) < shMemInt.getShMemData(INTERVALTIME)) continue;
 		interval = timer.getLapTime();
+
 		//エンコーダから移動量，回転量を取得
 		Encoder(handle_ARDUINO, dist, rad);
+
 		//積算した距離を格納
 		chairdist = dist;
 
@@ -268,7 +273,7 @@ void getDataUNKOOrigin(int URG_COM[], float URGPOS[][4], int ARDUINO_COM, int Nu
 			unkoArray[i].updateCurrentCoord(currentCoord);
 			unkoArray[i].setPCImageColor(color[i]);
 			unkoArray[i].writeMap(dist,chairdist_old, rad);
-			unkoArray[i].savePCD();
+			unkoArray[i].saveRawPCD(dist,rad);
 		}
 		
 		//現在の位置を更新

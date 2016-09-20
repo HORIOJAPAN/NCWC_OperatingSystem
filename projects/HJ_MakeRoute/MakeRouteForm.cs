@@ -151,7 +151,7 @@ namespace HJ_MakeRoute
             routeTxt.Text = String.Format("X, Y, S, A, etc, \r\n");
 
             Process myProcess = new Process();
-            myProcess.StartInfo.FileName = "../../../Debug\\MakeRoutepp.exe";
+            myProcess.StartInfo.FileName = "../../../../Debug\\MakeRoutepp.exe";
             myProcess.StartInfo.Arguments = "\"" + newRouteDlog.FileName + "\"";
             myProcess.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
             myProcess.Start();

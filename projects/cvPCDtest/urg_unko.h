@@ -46,6 +46,7 @@ public:
 	void pcdWrite(float x, float y);
 	void pcdWrite(float x, float y, float z);
 	void pcdWrite(float x, float y, float pos_x, float pos_y);
+	void pcdWrite(float x, float y, float pos_x, float pos_y, float dist, float rad);
 	void pcdWrite(float x, float y, float pos_x, float pos_y, float droidAngle[], float droidGPS[]);
 	//pcdファイルへの書き込みを終了して保存する
 	void pcdSave();
@@ -87,6 +88,7 @@ protected:
 	float radian = 0.0;
 
 	float* pointpos[2];
+	float* rawpointpos[2];
 	int data_n;
 
 	static writePCD pcd;
@@ -118,6 +120,7 @@ public:
 	int getData4URG(float dist, float old, float rad);
 
 	void savePCD();
+	void saveRawPCD(float dist,float rad);
 
 	void updateCurrentCoord(float coord_x, float coord_y);
 	void updateCurrentCoord(float coordXY[]);

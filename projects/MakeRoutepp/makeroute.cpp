@@ -179,7 +179,8 @@ void main(int argc, char* argv[])
 {
 	// コマンドライン引数からパスを取得して画像を読み込む
 	pic = imread(argv[1] , 0);
-
+	//pic = imread("C:\\Users\\NCWC\\Source\\Repos\\NCWC_OperatingSystem\\projects\\cvPCDtest\\20160527144523\\0_0.jpg", 0);
+	//
 	ifstream ifs("origin.txt");
 	if (ifs.fail())
 	{

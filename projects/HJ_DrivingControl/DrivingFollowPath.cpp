@@ -12,7 +12,7 @@ DrivingFollowPath::DrivingFollowPath(string fname, double coefficientL, double c
 	ifs.open(fileName);
 	if (ifs.fail())
 	{
-		cerr << "unko False" << endl;
+		cerr << "経路データ読み込み失敗" << endl;
 		return;
 	}
 	// ヘッダ部分をとばす
@@ -112,6 +112,91 @@ void DrivingFollowPath::getEncoderCount()
 	totalRightCount += (signed char)receive_data[1];
 
 	//cout << "L:" << leftCount << ",R:" << rightCount << endl;
+}
+const string FMNAME_f_num = "testmap_f_num";	//共有ファイル名
+const string FMNAME_pos_rad = "testmap_pos_rad";	//共有ファイル名
+
+bool isInitialized = false;
+
+//左右輪のエンコーダ生データ積算用
+int data_L = 0, data_R = 0;
+
+//1カウント当たりの距離
+double encord_dis_L = 12.3567, encord_dis_R = 12.3962;
+
+float currentCoord[2] = {};	//測定開始位置から見た現在の位置
+
+float chairdist = 0.0;//車いすの移動量
+float chairdist_old = 0.0;
+
+int Encoder(HANDLE hComm, float& dist, float& rad)
+{
+	unsigned char	sendbuf[1];
+	unsigned char	receive_data[2];
+	int				ret;
+	float			DL, DR, DIS, ANG;
+	unsigned long	len;
+
+	float			droidOrientation[3];
+
+	// ハンドルチェック
+	if (!hComm)	return -1;
+	// バッファクリア
+	memset(sendbuf, 0x00, sizeof(sendbuf));
+	// パケット作成
+	sendbuf[0] = (unsigned char)1;
+	// 通信バッファクリア
+	PurgeComm(hComm, PURGE_RXCLEAR);
+	// 送信
+	ret = WriteFile(hComm, &sendbuf, 1, &len, NULL);
+
+	// バッファクリア
+	memset(receive_data, 0x00, sizeof(receive_data));
+	// 通信バッファクリア
+	PurgeComm(hComm, PURGE_RXCLEAR);
+	// Arduinoからデータを受信
+	ret = ReadFile(hComm, &receive_data, 2, &len, NULL);
+	//cout << static_cast<bitset<8>>(receive_data[0]) << "," << static_cast<bitset<8>>(receive_data[1] )<< endl;
+
+
+	//初期化されていなければ初期化(初めのデータを捨てる)
+	if (!isInitialized)
+	{
+		isInitialized = true;
+		return 0;
+	}
+
+	//取得した値を符号つきに代入
+	signed char receive_char1, receive_char2;
+	receive_char1 = receive_data[0];
+	receive_char2 = receive_data[1];
+
+	// データを積算
+	data_L += static_cast<int>(receive_char1);
+	data_R += static_cast<int>(receive_char2);
+
+	//左右輪の回転量から移動量を計算
+	DL = receive_char1 * encord_dis_L;
+	DR = receive_char2 * encord_dis_R;
+
+	//移動距離，回転量を計算
+	DIS = (DL + DR) / 2;
+	ANG = -(DL - DR) / 541;	//右回転が正
+
+	//移動量，回転量を積算用変数へ積算
+	dist += DIS;
+	rad += ANG;
+	//rcvDroid.getOrientationData(droidOrientation);
+	//rad = droidOrientation[0] - defaultOrientation[0];
+
+	currentCoord[0] += cos(rad) * (dist - chairdist_old);
+	currentCoord[1] -= sin(rad) * (dist - chairdist_old);
+
+	//現在の移動量を保存
+	chairdist_old = dist;
+
+
+	return ret;
 }
 
 // 方向とエンコーダのカウント数を指定してコマンドを送信
@@ -330,7 +415,7 @@ void DrivingFollowPath::waitDriveComplete()
 {
 	while (abs(leftCount) < abs(aimCount_L) && abs(rightCount) < abs(aimCount_R))
 	{
-		getEncoderCount();
+		//getEncoderCount();
 	}
 	leftCount = 0;
 	rightCount = 0;
@@ -410,6 +495,7 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 		dAzimuth = nowOrientation[0] - defaultOrientation[0];
 
 		//checkCurrentAzimuth();
+		
 		cout << "基準[deg]:" << defaultOrientation[0] << ",今[deg]:" << nowOrientation[0] << endl;
 		if (abs(dAzimuth) > angleThresh && abs(dAzimuth) < 30)
 		{
@@ -446,9 +532,12 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 	}
 }
 
+float dis = 0, rad = 0;
+
 // 移動完了まで待機する
 void DrivingFollowPath::waitDriveComplete_FF()
 {
+
 	cout << "Wait time [millisec]:" << waittime << endl;
 
 	Timer waitDriveTimer;
@@ -456,7 +545,9 @@ void DrivingFollowPath::waitDriveComplete_FF()
 
 	while (waitDriveTimer.getLapTime(1, Timer::millisec, false) < waittime)
 	{
-		getEncoderCount();
+		Encoder(hEncoderComm, dis, rad);
+		cout << "dis;" << dis << "rad:" <<rad<< endl;
+		//getEncoderCount();
 		checkEmergencyStop(waitDriveTimer);
 	}
 
@@ -467,15 +558,27 @@ void DrivingFollowPath::waitDriveComplete_FF()
 // FFで駆動を開始する
 void DrivingFollowPath::run_FF()
 {
-	getEncoderCount();
+	int f_num = 0;
 
+	//getEncoderCount();
+
+	SharedMemory<int> shMem_f_num(FMNAME_f_num);
+	SharedMemory<float> shMem_pos_rad(FMNAME_pos_rad);
+	shMem_f_num.setShMemData(f_num);
+	shMem_pos_rad.setShMemData(currentCoord[0]);
+	shMem_pos_rad.setShMemData(currentCoord[1], 1);
+	shMem_pos_rad.setShMemData(rad / 180 * 3.14, 2);
+	Encoder(hEncoderComm,dis,rad);
 	char z = getchar();
 
 	while (getNextPoint())
 	{
+		
+
 		cout << "回転" << endl;
 		sendRotation( calcRotationAngle());
 		do{
+			Encoder(hEncoderComm, dis, rad);//
 			if (aimCount_L > 0) sendDrivingCommand_count(RIGHT, aimCount_L);
 			else sendDrivingCommand_count(LEFT, aimCount_L);
 			waitDriveComplete_FF();
@@ -485,20 +588,34 @@ void DrivingFollowPath::run_FF()
 		rcvDroid.getOrientationData(defaultOrientation);
 		cout << "直進" << endl;
 		sendStraight( calcMovingDistance());
-		do{
+		do{			//
+			
 			if (aimCount_L > 0) sendDrivingCommand_count(FORWARD, aimCount_L);
 			else sendDrivingCommand_count(BACKWARD, aimCount_L);
 			waitDriveComplete_FF();
 		} while (overdelayCount);
 		Sleep(500);
-
-		if(doMatching)	mUrgd.tMatching(x_next, y_next, orientation , mapNum - 1 );
+		
+		if (doMatching)
+		{
+			
+			f_num++;
+			shMem_f_num.setShMemData(f_num);
+			shMem_pos_rad.setShMemData(currentCoord[0]);
+			shMem_pos_rad.setShMemData(currentCoord[1], 1);
+			shMem_pos_rad.setShMemData(rad,2);
+			cout << "x:" << currentCoord[0] << "y:" << currentCoord[1] << "rad;" << rad<<endl;
+			cout << "Wait Key" << endl;
+			getchar();
+			
+			mUrgd.tMatching(x_next, y_next, orientation, mapNum - 1);
+		}
 	}
 }
 // FBで駆動を開始する(過去の遺産)
 void DrivingFollowPath::run()
 {
-	getEncoderCount();
+	//getEncoderCount();
 
 	while (getNextPoint())
 	{

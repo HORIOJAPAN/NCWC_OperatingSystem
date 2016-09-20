@@ -123,8 +123,8 @@ int urg_unko::getData4URG(float dist,float old, float rad){
 #if 1
 	//データの取得範囲を変更する場合
 	urg_set_scanning_parameter(&urg,
-		urg_deg2step(&urg, -120),
-		urg_deg2step(&urg, +120), 0);
+		urg_deg2step(&urg, -100),
+		urg_deg2step(&urg, +100), 0);
 #endif
 
 	//積算した距離,回転角を格納
@@ -184,6 +184,8 @@ void urg_unko::calcSurface2D()
 		{
 			if (this->pointpos[i] != NULL)	delete[] this->pointpos[i];
 			this->pointpos[i] = new float[data_n];
+			if (this->rawpointpos[i] != NULL)	delete[] this->rawpointpos[i];
+			this->rawpointpos[i] = new float[data_n];
 		}
 		//データの数だけ実際の座標を計算してマップ，pcdファイルに書き込む
 		for (int i = 0; i < data_n; ++i) {
@@ -196,6 +198,8 @@ void urg_unko::calcSurface2D()
 			if ((l <= min_distance) || (l >= max_distance)) {
 				this->pointpos[0][i] = 0;
 				this->pointpos[1][i] = 0;
+				this->rawpointpos[0][i] = 0;
+				this->rawpointpos[1][i] = 0;
 				continue;
 			}
 
@@ -209,8 +213,10 @@ void urg_unko::calcSurface2D()
 			z = urgpos[0];*/
 
 			// センサ空間時の取得座標
-			x = (float)(l * cos(radian + urgpos[3]));
-			y = -(float)(l * sin(radian + urgpos[3]));
+			//x:進行方向
+			x = rawpointpos[0][i] = (float)(l * cos(radian + urgpos[3]));
+			//y:進行方向に対して横方向
+			y = rawpointpos[1][i] = (float)(l * sin(radian + urgpos[3]));
 
 			// 2次元平面の座標変換
 			//pointpos[0] = +cos(this->radian) * x + sin(this->radian) * y + cos(this->radian) * (distance - distance_old + urgpos[1]) + currentCoord_x;
@@ -244,8 +250,17 @@ void urg_unko::savePCD()
 	pcd.pcdinit();
 	for (int i = 0; i < data_n; i++)
 	{
-		//pcd.pcdWrite(pointpos[0][i] / 1000, pointpos[1][i] / 1000, currentCoord_x / 1000, currentCoord_y / 1000);
-		pcd.pcdWrite(pointpos[0][i] / 1000, pointpos[1][i] / 1000, pointpos[2][i] / 1000);
+		pcd.pcdWrite(pointpos[0][i] / 1000, pointpos[1][i] / 1000, currentCoord_x / 1000, currentCoord_y / 1000);
+		//pcd.pcdWrite(pointpos[0][i] / 1000, pointpos[1][i] / 1000, pointpos[2][i] / 1000);
+	}
+	pcd.pcdSave();
+}
+void urg_unko::saveRawPCD(float dist , float rad)
+{
+	pcd.pcdinit();
+	for (int i = 0; i < data_n; i++)
+	{
+		pcd.pcdWrite(rawpointpos[0][i] / 1000, rawpointpos[1][i] / 1000, currentCoord_x / 1000, currentCoord_y / 1000,dist,rad);
 	}
 	pcd.pcdSave();
 }
@@ -339,6 +354,14 @@ void writePCD::pcdWrite(float x, float y, float pos_x, float pos_y)
 
 	//データを書き込んでデータ数をカウント
 	*this << x << ", " << y << ", " << pos_x << ", " << pos_y << ", " << endl;
+	pcdcount++;
+}
+void writePCD::pcdWrite(float x, float y, float pos_x, float pos_y,float dist,float rad)
+{
+	if (!isWritePCD) return;
+
+	//データを書き込んでデータ数をカウント
+	*this << x << ", " << y << ", " << pos_x << ", " << pos_y << ", " << dist << ", " << rad << ", " << endl;
 	pcdcount++;
 }
 void writePCD::pcdWrite(float x, float y, float z)

@@ -5,6 +5,8 @@
 
 using namespace std;
 const string FMNAME = "testmap";	//共有ファイル名
+const string FMNAME_f_num = "testmap_f_num";	//共有ファイル名
+const string FMNAME_pos_rad = "testmap_pos_rad";	//共有ファイル名
 
 void unko_main()
 {
@@ -34,6 +36,8 @@ void main()
 
 	//型とファイルマッピングオブジェクト名を指定してインスタンス生成
 	SharedMemory<int> shMem(FMNAME);
+	SharedMemory<int> shMem_f_num(FMNAME_f_num);
+	SharedMemory<float> shMem_pos_rad(FMNAME_pos_rad);
 
 	if (shMem.isCreated()) {
 		myNum = shMem.getShMemData();
@@ -54,6 +58,10 @@ void main()
 
 		for (int i = 1; i <= amount; i++)
 		{
+			cout << "f_num;" << shMem_f_num.getShMemData(0) << endl;
+			cout << "x;" << shMem_pos_rad.getShMemData(0) << endl;
+			cout << "y;" << shMem_pos_rad.getShMemData(1) << endl;
+			cout << "rad;" << shMem_pos_rad.getShMemData(2) << endl;
 			if (i != myNum)	cout << "Process" << i << " says => " << shMem.getShMemData(i) << endl;
 		}
 
