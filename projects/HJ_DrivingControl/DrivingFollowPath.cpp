@@ -3,10 +3,9 @@
 * コンストラクタ
 * 経路ファイルを読み込んでヘッダをとばす
 */
-DrivingFollowPath::DrivingFollowPath(string fname, double coefficientL, double coefficientR, int ecdrCOM, int ctrlrCOM)
+DrivingFollowPath::DrivingFollowPath(string fname, double coefficientL, double coefficientR, int ecdrCOM)
 	: fileName(fname), leftCoefficient(coefficientL), rightCoefficient(coefficientR), encoderCOM(ecdrCOM)
 {
-	controllerCOM = ctrlrCOM;
 
 	// 経路データを読み込む
 	ifs.open(fileName);
@@ -26,7 +25,21 @@ DrivingFollowPath::DrivingFollowPath(string fname, double coefficientL, double c
 	y_now = y_next;
 
 	getArduinoHandle(encoderCOM, hEncoderComm, 500);
-	setControllerCOM(controllerCOM);
+
+	// Spur初期化
+	Spur_init();
+
+	// 制御パラメータをそれっぽく初期設定
+	Spur_set_vel(0.3);
+	Spur_set_accel(1.0);
+	Spur_set_angvel(1.5);
+	Spur_set_angaccel(2.0);
+
+	// 原点の設定
+	Spur_set_pos_GL(0, 0, 0);
+	Spur_set_pos_LC(0, 0, 0);
+
+	origin_y = y_next;
 
 	overdelayCount = 0;
 }
@@ -152,56 +165,56 @@ void DrivingFollowPath::sendDrivingCommand_count(Direction direction, int count)
 // 方向と時間を指定してコマンドを送信
 void DrivingFollowPath::sendDrivingCommand(Direction direction, int delay_int)
 {
-	int mode = 1;
+	//int mode = 1;
 
-	preDirection = nowDirection;
-	nowDirection = direction;
+	//preDirection = nowDirection;
+	//nowDirection = direction;
 
-	// delay_intは99999以上を指定できないので
-	if (overdelayCount)
-	{
-		delay_int = 90000;
-		overdelayCount--;
-	}
-	else if (delay_int > 99999)
-	{
-		overdelayCount = delay_int / 90000;
-		delay_int = delay_int % 90000;
-	}
+	//// delay_intは99999以上を指定できないので
+	//if (overdelayCount)
+	//{
+	//	delay_int = 90000;
+	//	overdelayCount--;
+	//}
+	//else if (delay_int > 99999)
+	//{
+	//	overdelayCount = delay_int / 90000;
+	//	delay_int = delay_int % 90000;
+	//}
 
-	// STOPの時は待機時間を保存しない
-	if (direction != STOP) waittime = delay_int;
+	//// STOPの時は待機時間を保存しない
+	//if (direction != STOP) waittime = delay_int;
 
-	switch (direction)
-	{
-	case STOP:
-		mode = 0;
-		DrivingControl::sendDrivingCommand(mode, 0, 0, delay_int);
-		break;
+	//switch (direction)
+	//{
+	//case STOP:
+	//	mode = 0;
+	//	DrivingControl::sendDrivingCommand(mode, 0, 0, delay_int);
+	//	break;
 
-	case FORWARD:
-		DrivingControl::sendDrivingCommand(mode, -1000, 405, delay_int);
-		break;
+	//case FORWARD:
+	//	DrivingControl::sendDrivingCommand(mode, -1000, 405, delay_int);
+	//	break;
 
-	case FORWARD_SLOW:
-		DrivingControl::sendDrivingCommand(mode, -800, 450, delay_int);
-		break;
+	//case FORWARD_SLOW:
+	//	DrivingControl::sendDrivingCommand(mode, -800, 450, delay_int);
+	//	break;
 
-	case BACKWARD:
-		DrivingControl::sendDrivingCommand(mode, 600, 509, delay_int);
-		break;
+	//case BACKWARD:
+	//	DrivingControl::sendDrivingCommand(mode, 600, 509, delay_int);
+	//	break;
 
-	case RIGHT:
-		DrivingControl::sendDrivingCommand(mode, -380, -1500, delay_int);
-		break;
+	//case RIGHT:
+	//	DrivingControl::sendDrivingCommand(mode, -380, -1500, delay_int);
+	//	break;
 
-	case LEFT:
-		DrivingControl::sendDrivingCommand(mode, 0, 1500, delay_int);
-		break;
+	//case LEFT:
+	//	DrivingControl::sendDrivingCommand(mode, 0, 1500, delay_int);
+	//	break;
 
-	default:
-		break;
-	}
+	//default:
+	//	break;
+	//}
 }
 
 // 外積で回転角を計算
@@ -349,16 +362,16 @@ void DrivingFollowPath::checkEmergencyStop(Timer& timer)
 	int time = timer.getLapTime(1, Timer::millisec, false);
 
 	emergencyCount += time;
-	if (emergencyCount > 500)
-	{
-		DrivingControl::sendDrivingCommand(1, 0, 0, 0);
-		if (!lastReadBytes){
-			cout << "非常停止してるズラ！" << endl;
-			if (MessageBoxA(NULL, "もしかして非常停止してる？？\n動いてもいい？？", "もしかして！", MB_YESNO | MB_ICONSTOP) == IDYES)
-				restart(time, timer);
-		}
-		emergencyCount = 0;
-	}
+	//if (emergencyCount > 500)
+	//{
+	//	DrivingControl::sendDrivingCommand(1, 0, 0, 0);
+	//	if (!lastReadBytes){
+	//		cout << "非常停止してるズラ！" << endl;
+	//		if (MessageBoxA(NULL, "もしかして非常停止してる？？\n動いてもいい？？", "もしかして！", MB_YESNO | MB_ICONSTOP) == IDYES)
+	//			restart(time, timer);
+	//	}
+	//	emergencyCount = 0;
+	//}
 	
 	if (urg_driving::ObstacleEmergency emergency = mUrgd.checkObstacle())
 	{
@@ -469,28 +482,30 @@ void DrivingFollowPath::run_FF()
 {
 	getEncoderCount();
 
-	char z = getchar();
+	cout << "Start driving follow path \n Please press enter\n" << endl;
+	getchar();
 
 	while (getNextPoint())
 	{
 		cout << "回転" << endl;
-		sendRotation( calcRotationAngle());
-		do{
-			if (aimCount_L > 0) sendDrivingCommand_count(RIGHT, aimCount_L);
-			else sendDrivingCommand_count(LEFT, aimCount_L);
-			waitDriveComplete_FF();
-		} while (overdelayCount);
-		Sleep(500);
+		calcRotationAngle()
+		Spur_spin_GL(-orientation);
+		while (!Spur_near_ang_GL(-orientation, 0.1)) Sleep(10);
 
-		rcvDroid.getOrientationData(defaultOrientation);
+		//sendDrivingCommand_count(LEFT, aimCount_L);
+		//waitDriveComplete_FF();
+		//Sleep(500);
+
 		cout << "直進" << endl;
-		sendStraight( calcMovingDistance());
-		do{
-			if (aimCount_L > 0) sendDrivingCommand_count(FORWARD, aimCount_L);
-			else sendDrivingCommand_count(BACKWARD, aimCount_L);
-			waitDriveComplete_FF();
-		} while (overdelayCount);
-		Sleep(500);
+		//calcMovingDistance();
+		double x = x_next * 0.05; // [m]
+		double y = (origin_y - y_next) * 0.05; // [m]
+		Spur_line_GL(x, y, -orientation);
+		while (!Spur_line_GL(x, y, -orientation)) Sleep(10);
+		//sendDrivingCommand_count(BACKWARD, aimCount_L);
+		//waitDriveComplete_FF();
+		//Sleep(500);
+		Spur_stop();
 
 		if(doMatching)	mUrgd.tMatching(x_next, y_next, orientation , mapNum - 1 );
 	}

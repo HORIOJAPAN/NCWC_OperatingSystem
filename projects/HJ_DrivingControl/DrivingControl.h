@@ -9,6 +9,8 @@
 #include <Windows.h>
 #include <stdarg.h>
 
+#include <ypspur.h>
+
 #include "../Timer/Timer.h"
 #include "../cvPCDtest/urg_unko.h"
 #include "../HJ_ReceiveAndroidSensors/receiveAndroidSensors.h"
@@ -21,6 +23,21 @@ using namespace std;
 const int angleThresh = 10;
 
 void getArduinoHandle(int arduinoCOM, HANDLE& hComm, int timeoutmillisec);
+
+class Ypspur
+{
+protected:
+	const float WHEEL_RADIUS;
+	const float MAX_VEL;
+	const float MAX_ACC;
+
+public:
+	Ypspur(float wheel_rad, float max_vel, float max_acc);
+
+
+
+
+};
 
 // 駆動指令の基本クラス
 class DrivingControl
@@ -75,7 +92,6 @@ public:
 
 // 経路データを読み込んで駆動指令を行うやつ
 class DrivingFollowPath
-	: public DrivingControl
 {
 private:
 	// 経路データ読み取り用変数
@@ -89,6 +105,8 @@ private:
 	int	x_old, y_old;					// 1つ前の座標
 	int x_now, y_now;					// 現在の座標
 	int	x_next = 0, y_next = 0;			// 次の座標
+
+	int origin_y;
 
 	int doMatching;
 	int mapNum;
@@ -145,7 +163,7 @@ private:
 
 public:
 	// もろもろの初期化処理
-	DrivingFollowPath(string fname, double coefficientL, double coefficientR, int arduioCOM, int ctrlrCOM);
+	DrivingFollowPath(string fname, double coefficientL, double coefficientR, int arduioCOM);
 
 	// Manage2URG_Driveクラス関連
 	void setURGParam(int URG_COM[], float URGPOS[][4], int NumOfURG);
