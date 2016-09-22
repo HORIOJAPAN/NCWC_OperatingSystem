@@ -24,16 +24,16 @@ DrivingFollowPath::DrivingFollowPath(string fname, double coefficientL, double c
 	x_now = x_next - 5;
 	y_now = y_next;
 
-	getArduinoHandle(encoderCOM, hEncoderComm, 500);
+	//getArduinoHandle(encoderCOM, hEncoderComm, 500);
 
 	// Spur初期化
 	Spur_init();
 
 	// 制御パラメータをそれっぽく初期設定
 	Spur_set_vel(0.3);
-	Spur_set_accel(1.0);
-	Spur_set_angvel(1.5);
-	Spur_set_angaccel(2.0);
+	Spur_set_accel(0.6);
+	Spur_set_angvel(0.6);
+	Spur_set_angaccel(1.0);
 
 	// 原点の設定
 	Spur_set_pos_GL(0, 0, 0);
@@ -488,9 +488,11 @@ void DrivingFollowPath::run_FF()
 	while (getNextPoint())
 	{
 		cout << "回転" << endl;
-		calcRotationAngle()
+		calcRotationAngle();
 		Spur_spin_GL(-orientation);
+		cout << "目標角度:" << orientation << endl;
 		while (!Spur_near_ang_GL(-orientation, 0.1)) Sleep(10);
+		Sleep(500);
 
 		//sendDrivingCommand_count(LEFT, aimCount_L);
 		//waitDriveComplete_FF();
@@ -501,13 +503,19 @@ void DrivingFollowPath::run_FF()
 		double x = x_next * 0.05; // [m]
 		double y = (origin_y - y_next) * 0.05; // [m]
 		Spur_line_GL(x, y, -orientation);
-		while (!Spur_line_GL(x, y, -orientation)) Sleep(10);
+		cout << "目標->x:" << x << " ,y:" << y << " ,th:" << orientation << endl;
+		while (!Spur_over_line_GL(x, y, -orientation)) Sleep(10);
 		//sendDrivingCommand_count(BACKWARD, aimCount_L);
 		//waitDriveComplete_FF();
 		//Sleep(500);
 		Spur_stop();
+		Sleep(500);
 
-		if(doMatching)	mUrgd.tMatching(x_next, y_next, orientation , mapNum - 1 );
+		double local_x, local_y, r;
+		Spur_get_pos_GL(&local_x, &local_y, &r);
+		cout << "x:" << local_x << " ,y:" << local_y << " ,th:" << r << endl;
+
+		//if(doMatching)	mUrgd.tMatching(x_next, y_next, orientation , mapNum - 1 );
 	}
 }
 // FBで駆動を開始する(過去の遺産)
